@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenTK.Windowing.Desktop;
 
 namespace OpenGLTutorial
 {
@@ -6,7 +7,20 @@ namespace OpenGLTutorial
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            GameWindowSettings gws = new GameWindowSettings();
+            gws.IsMultiThreaded = false;
+            gws.RenderFrequency = 0;
+            gws.UpdateFrequency = 0;
+            NativeWindowSettings nws = new NativeWindowSettings();
+            nws.Flags = OpenTK.Windowing.Common.ContextFlags.Debug;
+            nws.IsFullscreen = false;
+            nws.NumberOfSamples = 0; // FSAA
+            nws.Title = "Mein OpenGL-Projekt";
+            nws.WindowBorder = OpenTK.Windowing.Common.WindowBorder.Fixed;
+
+            ApplicationWindow w = new ApplicationWindow(gws, nws);
+            w.Run();
+            w.Dispose();
         }
     }
 }
