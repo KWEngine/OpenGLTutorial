@@ -16,6 +16,7 @@ namespace OpenGLTutorial.ShaderProgramm
         private static int _fragmentShaderId = -1;
 
         private static int _uniformMatrix = -1;
+        private static int _uniformTexture = -1;
 
         public static void Init()
         {
@@ -52,6 +53,7 @@ namespace OpenGLTutorial.ShaderProgramm
             GL.LinkProgram(_shaderId);
 
             _uniformMatrix = GL.GetUniformLocation(_shaderId, "uMatrix");
+            _uniformTexture = GL.GetUniformLocation(_shaderId, "uTexture");
 
         }
 
@@ -63,6 +65,11 @@ namespace OpenGLTutorial.ShaderProgramm
         public static int GetMatrixId()
         {
             return _uniformMatrix;
+        }
+
+        public static int GetTextureId()
+        {
+            return _uniformTexture;
         }
     }
 }

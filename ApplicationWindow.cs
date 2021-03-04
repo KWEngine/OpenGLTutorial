@@ -8,6 +8,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
 using OpenGLTutorial.Primitives;
 using OpenGLTutorial.ShaderProgramm;
+using OpenGLTutorial.Textures;
 
 namespace OpenGLTutorial
 {
@@ -15,6 +16,8 @@ namespace OpenGLTutorial
     {
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera
+
+        private int _textureExample = -1;
 
         public ApplicationWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
@@ -41,6 +44,7 @@ namespace OpenGLTutorial
 
             _viewMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
 
+            _textureExample = TextureLoader.LoadTexture("OpenGLTutorial.Textures.crate.jpg");
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -71,9 +75,17 @@ namespace OpenGLTutorial
             GL.UseProgram(ShaderStandard.GetProgramId());
             GL.UniformMatrix4(ShaderStandard.GetMatrixId(), false, ref mvp);
 
+            // Texture an den Shader übertragen:
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, _textureExample);
+            GL.Uniform1(ShaderStandard.GetTextureId(), 0);
+
+
             GL.BindVertexArray(PrimitiveTriangle.GetVAOId());
             GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
             GL.BindVertexArray(0);
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
 
             GL.UseProgram(0);
 
