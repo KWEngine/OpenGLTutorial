@@ -8,15 +8,18 @@
   <ItemGroup>
     <None Remove="ShaderProgramm\shaderStandard_fragment.glsl" />
     <None Remove="ShaderProgramm\shaderStandard_vertex.glsl" />
+    <None Remove="Textures\crate.jpg" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="ShaderProgramm\shaderStandard_fragment.glsl" />
     <EmbeddedResource Include="ShaderProgramm\shaderStandard_vertex.glsl" />
+    <EmbeddedResource Include="Textures\crate.jpg" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenTK" Version="4.5.0" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.1" />
   </ItemGroup>
 
 </Project>
