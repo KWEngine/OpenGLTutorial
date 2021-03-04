@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text;
 using OpenTK.Graphics.OpenGL4;
 using System.IO;
+using OpenTK.Mathematics;
 
 namespace OpenGLTutorial.ShaderProgramm
 {
@@ -13,6 +14,8 @@ namespace OpenGLTutorial.ShaderProgramm
 
         private static int _vertexShaderId = -1;
         private static int _fragmentShaderId = -1;
+
+        private static int _uniformMatrix = -1;
 
         public static void Init()
         {
@@ -48,11 +51,18 @@ namespace OpenGLTutorial.ShaderProgramm
 
             GL.LinkProgram(_shaderId);
 
+            _uniformMatrix = GL.GetUniformLocation(_shaderId, "uMatrix");
+
         }
 
         public static int GetProgramId()
         {
             return _shaderId;
+        }
+
+        public static int GetMatrixId()
+        {
+            return _uniformMatrix;
         }
     }
 }

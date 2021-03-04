@@ -16,7 +16,7 @@ namespace OpenGLTutorial
             nws.IsFullscreen = false;
             nws.NumberOfSamples = 0; // FSAA
             nws.Title = "Mein OpenGL-Projekt";
-            nws.WindowBorder = OpenTK.Windowing.Common.WindowBorder.Fixed;
+            nws.WindowBorder = OpenTK.Windowing.Common.WindowBorder.Resizable;
 
             ApplicationWindow w = new ApplicationWindow(gws, nws);
             w.Run();
