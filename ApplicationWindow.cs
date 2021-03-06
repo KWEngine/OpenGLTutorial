@@ -9,15 +9,16 @@ using OpenTK.Windowing.Common;
 using OpenGLTutorial.Primitives;
 using OpenGLTutorial.ShaderProgramm;
 using OpenGLTutorial.Textures;
+using OpenGLTutorial.GameCore;
 
 namespace OpenGLTutorial
 {
     class ApplicationWindow : GameWindow
     {
+        private GameWorld _currentWorld = new GameWorld();
+
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera
-
-        private int _textureExample = -1;
 
         public ApplicationWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
@@ -40,11 +41,24 @@ namespace OpenGLTutorial
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
             PrimitiveTriangle.Init();
+            PrimitiveQuad.Init();
             ShaderStandard.Init();
 
             _viewMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
 
-            _textureExample = TextureLoader.LoadTexture("OpenGLTutorial.Textures.crate.jpg");
+           
+
+            GameObject g1 = new GameObject();
+            g1.Position = new Vector3(100, -50, 0);
+            g1.SetScale(300, 300, 1);
+            g1.SetTexture("OpenGLTutorial.Textures.crate.jpg");
+            _currentWorld.AddGameObject(g1);
+
+            GameObject g2 = new GameObject();
+            g2.Position = new Vector3(-100, +50, 0);
+            g2.SetScale(50, 50, 1);
+            g2.SetTexture("OpenGLTutorial.Textures.crate.jpg");
+            _currentWorld.AddGameObject(g2);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -65,27 +79,33 @@ namespace OpenGLTutorial
             // view-projection matrix:
             Matrix4 viewProjection = _viewMatrix * _projectionMatrix;
 
-            // model matrix (zum Testen):
-            Matrix4 modelMatrix = Matrix4.CreateScale(200) * Matrix4.CreateTranslation(-100, 0, 0);
-
-            // model-view-projection matrix erstellen:
-            Matrix4 mvp = modelMatrix * viewProjection;
-
             // Shader-Programm wählen:
             GL.UseProgram(ShaderStandard.GetProgramId());
-            GL.UniformMatrix4(ShaderStandard.GetMatrixId(), false, ref mvp);
 
-            // Texture an den Shader übertragen:
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, _textureExample);
-            GL.Uniform1(ShaderStandard.GetTextureId(), 0);
+            foreach (GameObject g in _currentWorld.GetGameObjects())
+            {
+                Matrix4 modelMatrix = 
+                    Matrix4.CreateScale(g.GetScale()) 
+                    * Matrix4.CreateFromQuaternion(g.GetRotation()) 
+                    * Matrix4.CreateTranslation(g.Position);
+
+                // model-view-projection matrix erstellen:
+                Matrix4 mvp = modelMatrix * viewProjection;
+
+                GL.UniformMatrix4(ShaderStandard.GetMatrixId(), false, ref mvp);
+
+                // Texture an den Shader übertragen:
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, g.GetTextureId());
+                GL.Uniform1(ShaderStandard.GetTextureId(), 0);
 
 
-            GL.BindVertexArray(PrimitiveTriangle.GetVAOId());
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-            GL.BindVertexArray(0);
+                GL.BindVertexArray(PrimitiveQuad.GetVAOId());
+                GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
+                GL.BindVertexArray(0);
 
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+            }
 
             GL.UseProgram(0);
 
@@ -96,6 +116,11 @@ namespace OpenGLTutorial
         {
             base.OnUpdateFrame(args);
             // Objekte richten sich je nach Benutzereingaben neu in der Welt aus
+
+            foreach (GameObject g in _currentWorld.GetGameObjects())
+            {
+                g.Update(KeyboardState, MouseState);
+            }
         }
     }
 }
