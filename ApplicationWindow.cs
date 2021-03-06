@@ -20,8 +20,6 @@ namespace OpenGLTutorial
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera
 
-        private int _textureExample = -1;
-
         public ApplicationWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
         {
