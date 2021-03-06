@@ -16,7 +16,13 @@ namespace OpenGLTutorial.ShaderProgramm
         private static int _fragmentShaderId = -1;
 
         private static int _uniformMatrix = -1;
+        private static int _uniformModelMatrix = -1;
+        private static int _uniformNormalMatrix = -1;
+
         private static int _uniformTexture = -1;
+        private static int _uniformLightCount = -1;
+        private static int _uniformLightPositions = -1;
+        private static int _uniformAmbientLight = -1;
 
         public static void Init()
         {
@@ -53,7 +59,14 @@ namespace OpenGLTutorial.ShaderProgramm
             GL.LinkProgram(_shaderId);
 
             _uniformMatrix = GL.GetUniformLocation(_shaderId, "uMatrix");
+            _uniformModelMatrix = GL.GetUniformLocation(_shaderId, "uModelMatrix");
+            _uniformNormalMatrix = GL.GetUniformLocation(_shaderId, "uNormalMatrix");
+
             _uniformTexture = GL.GetUniformLocation(_shaderId, "uTexture");
+
+            _uniformLightCount = GL.GetUniformLocation(_shaderId, "uLightCount");
+            _uniformLightPositions = GL.GetUniformLocation(_shaderId, "uLightPositions");
+            _uniformAmbientLight = GL.GetUniformLocation(_shaderId, "uAmbientLight");
 
         }
 
@@ -67,9 +80,34 @@ namespace OpenGLTutorial.ShaderProgramm
             return _uniformMatrix;
         }
 
+        public static int GetModelMatrixId()
+        {
+            return _uniformModelMatrix;
+        }
+
+        public static int GetNormalMatrixId()
+        {
+            return _uniformNormalMatrix;
+        }
+
         public static int GetTextureId()
         {
             return _uniformTexture;
+        }
+
+        public static int GetLightCountId()
+        {
+            return _uniformLightCount;
+        }
+
+        public static int GetLightPositionsId()
+        {
+            return _uniformLightPositions;
+        }
+
+        public static int GetAmbientLightId()
+        {
+            return _uniformAmbientLight;
         }
     }
 }

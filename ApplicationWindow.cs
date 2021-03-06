@@ -59,6 +59,14 @@ namespace OpenGLTutorial
             g2.SetScale(50, 50, 1);
             g2.SetTexture("OpenGLTutorial.Textures.crate.jpg");
             _currentWorld.AddGameObject(g2);
+
+            LightObject l1 = new LightObject();
+            l1.Position = new Vector3(0, 0, 1);
+            _currentWorld.AddLightObject(l1);
+
+            LightObject l2 = new LightObject();
+            l2.Position = new Vector3(-100, 100, 1);
+            _currentWorld.AddLightObject(l2);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -82,6 +90,13 @@ namespace OpenGLTutorial
             // Shader-Programm wählen:
             GL.UseProgram(ShaderStandard.GetProgramId());
 
+            float[] lightpositions = _currentWorld.GetLightPositions();
+            int lightCount = _currentWorld.GetLightCount();
+
+            GL.Uniform3(ShaderStandard.GetLightPositionsId(), lightCount, lightpositions);
+            GL.Uniform1(ShaderStandard.GetLightCountId(), lightCount);
+            GL.Uniform3(ShaderStandard.GetAmbientLightId(), 0.5f, 0.5f, 0.5f);
+
             foreach (GameObject g in _currentWorld.GetGameObjects())
             {
                 Matrix4 modelMatrix = 
@@ -89,10 +104,14 @@ namespace OpenGLTutorial
                     * Matrix4.CreateFromQuaternion(g.GetRotation()) 
                     * Matrix4.CreateTranslation(g.Position);
 
+                Matrix4 normalMatrix = Matrix4.Invert(Matrix4.Transpose(modelMatrix));
+
                 // model-view-projection matrix erstellen:
                 Matrix4 mvp = modelMatrix * viewProjection;
 
                 GL.UniformMatrix4(ShaderStandard.GetMatrixId(), false, ref mvp);
+                GL.UniformMatrix4(ShaderStandard.GetModelMatrixId(), false, ref modelMatrix);
+                GL.UniformMatrix4(ShaderStandard.GetNormalMatrixId(), false, ref normalMatrix);
 
                 // Texture an den Shader übertragen:
                 GL.ActiveTexture(TextureUnit.Texture0);
