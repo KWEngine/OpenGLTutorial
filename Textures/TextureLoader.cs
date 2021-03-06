@@ -11,8 +11,40 @@ namespace OpenGLTutorial.Textures
 {
     public static class TextureLoader
     {
+        private static Dictionary<string, int> _textureDictionary = new Dictionary<string, int>();
+
+        public static void RegisterTexture(string filename, int openglid)
+        {
+            if(_textureDictionary.ContainsKey(filename))
+            {
+                // Fehlerfall:
+                throw new Exception("Texture is already stored in dictionary.");
+            }
+            else
+            {
+                _textureDictionary.Add(filename, openglid);
+            }
+        }
+
+        public static bool IsTextureAlreadyDefined(string filename)
+        {
+            return _textureDictionary.ContainsKey(filename);
+        }
+
+        public static int GetTexture(string filename)
+        {
+            _textureDictionary.TryGetValue(filename, out int id);
+            return id;
+        }
+
+
         public static int LoadTexture(string file)
         {
+            if(IsTextureAlreadyDefined(file))
+            {
+                throw new Exception("Texture is already defined.");
+            }
+
             Assembly a = Assembly.GetExecutingAssembly();
             Stream s = a.GetManifestResourceStream(file);
 
@@ -26,15 +58,17 @@ namespace OpenGLTutorial.Textures
                 BitmapData bmd = b.LockBits(
                     new Rectangle(0, 0, b.Width, b.Height), 
                     ImageLockMode.ReadOnly, 
-                    System.Drawing.Imaging.PixelFormat.Format24bppRgb
+                    b.PixelFormat
                     );
 
                 int textureId = GL.GenTexture();
 
                 GL.BindTexture(TextureTarget.Texture2D, textureId);
-                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8, 
-                    b.Width, b.Height, 0, 
-                    OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, bmd.Scan0);
+                GL.TexImage2D(TextureTarget.Texture2D, 0,
+                    b.PixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb ? PixelInternalFormat.Rgb8 : PixelInternalFormat.Rgba8, 
+                    b.Width, b.Height, 0,
+                    b.PixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb ? OpenTK.Graphics.OpenGL4.PixelFormat.Bgr : OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, 
+                    PixelType.UnsignedByte, bmd.Scan0);
 
                 GL.TexParameter(
                     TextureTarget.Texture2D, 
@@ -59,6 +93,8 @@ namespace OpenGLTutorial.Textures
 
                 b.Dispose();
                 s.Close();
+
+                RegisterTexture(file, textureId);
 
                 return textureId;
             }
