@@ -46,27 +46,26 @@ namespace OpenGLTutorial
 
             _viewMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
 
-           
-
             GameObject g1 = new GameObject();
-            g1.Position = new Vector3(100, -50, 0);
+            g1.Position = new Vector3(150, 0, 0);
             g1.SetScale(300, 300, 1);
-            g1.SetTexture("OpenGLTutorial.Textures.crate.jpg");
+            g1.SetTexture("OpenGLTutorial.Textures.metalgrid1_diffuse.png");
+            g1.SetNormalMap("OpenGLTutorial.Textures.metalgrid1_normal.png");
             _currentWorld.AddGameObject(g1);
 
             GameObject g2 = new GameObject();
-            g2.Position = new Vector3(-100, +50, 0);
-            g2.SetScale(50, 50, 1);
-            g2.SetTexture("OpenGLTutorial.Textures.crate.jpg");
+            g2.Position = new Vector3(-150, 0, 0);
+            g2.SetScale(300, 300, 1);
+            g2.SetTexture("OpenGLTutorial.Textures.metalgrid1_diffuse.png");
             _currentWorld.AddGameObject(g2);
 
             LightObject l1 = new LightObject();
             l1.Position = new Vector3(0, 0, 1);
             _currentWorld.AddLightObject(l1);
 
-            LightObject l2 = new LightObject();
-            l2.Position = new Vector3(-100, 100, 1);
-            _currentWorld.AddLightObject(l2);
+            //LightObject l2 = new LightObject();
+            //l2.Position = new Vector3(-100, 100, 1);
+            //_currentWorld.AddLightObject(l2);
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -118,6 +117,10 @@ namespace OpenGLTutorial
                 GL.BindTexture(TextureTarget.Texture2D, g.GetTextureId());
                 GL.Uniform1(ShaderStandard.GetTextureId(), 0);
 
+                GL.ActiveTexture(TextureUnit.Texture1);
+                GL.BindTexture(TextureTarget.Texture2D, g.GetTextureNormalMap());
+                GL.Uniform1(ShaderStandard.GetTextureNormalMapId(), 1);
+                GL.Uniform1(ShaderStandard.GetTextureNormalMapUseId(), g.GetTextureNormalMap() > 0 ? 1 : 0);
 
                 GL.BindVertexArray(PrimitiveQuad.GetVAOId());
                 GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());

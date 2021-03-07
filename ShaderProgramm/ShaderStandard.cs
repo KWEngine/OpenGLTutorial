@@ -20,6 +20,9 @@ namespace OpenGLTutorial.ShaderProgramm
         private static int _uniformNormalMatrix = -1;
 
         private static int _uniformTexture = -1;
+        private static int _uniformTextureNormalMap = -1;
+        private static int _uniformTextureNormalMapUse = -1;
+
         private static int _uniformLightCount = -1;
         private static int _uniformLightPositions = -1;
         private static int _uniformAmbientLight = -1;
@@ -63,6 +66,8 @@ namespace OpenGLTutorial.ShaderProgramm
             _uniformNormalMatrix = GL.GetUniformLocation(_shaderId, "uNormalMatrix");
 
             _uniformTexture = GL.GetUniformLocation(_shaderId, "uTexture");
+            _uniformTextureNormalMap = GL.GetUniformLocation(_shaderId, "uTextureNormalMap");
+            _uniformTextureNormalMapUse = GL.GetUniformLocation(_shaderId, "uTextureNormalMapUse");
 
             _uniformLightCount = GL.GetUniformLocation(_shaderId, "uLightCount");
             _uniformLightPositions = GL.GetUniformLocation(_shaderId, "uLightPositions");
@@ -108,6 +113,16 @@ namespace OpenGLTutorial.ShaderProgramm
         public static int GetAmbientLightId()
         {
             return _uniformAmbientLight;
+        }
+
+        public static int GetTextureNormalMapId()
+        {
+            return _uniformTextureNormalMap;
+        }
+
+        public static int GetTextureNormalMapUseId()
+        {
+            return _uniformTextureNormalMapUse;
         }
     }
 }
