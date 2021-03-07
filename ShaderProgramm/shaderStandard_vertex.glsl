@@ -13,11 +13,16 @@ uniform mat4 uNormalMatrix;
 out vec2 vTextureCoordinates;
 out vec3 vPosition;
 out vec3 vNormal;
+out mat3 vTBN;
 
 void main()
 {
 	vPosition = (uModelMatrix * vec4(aPosition, 1.0)).xyz;
-	vNormal = (uNormalMatrix * vec4(aNormal, 0.0)).xyz;
+	vNormal = normalize((uNormalMatrix * vec4(aNormal, 0.0)).xyz);
+	vec3 tangent = normalize((uNormalMatrix * vec4(aTangent, 0.0)).xyz);
+	vec3 bitangent = normalize((uNormalMatrix * vec4(aBiTangent, 0.0)).xyz);
+
+	vTBN = mat3(tangent, bitangent, vNormal);
 
 	vTextureCoordinates = aTextureCoordinates;
 	vec4 positionNew = uMatrix * vec4(aPosition, 1.0);

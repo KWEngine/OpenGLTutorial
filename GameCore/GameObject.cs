@@ -14,6 +14,7 @@ namespace OpenGLTutorial.GameCore
         private Quaternion Orientation = new Quaternion(0, 0, 0, 1);
         private Vector3 Scale = new Vector3(1, 1, 1);
         private int _textureId = -1;
+        private int _textureNormalMapId = -1;
 
         public int GetTextureId()
         {
@@ -29,6 +30,23 @@ namespace OpenGLTutorial.GameCore
             else
             {
                 _textureId = TextureLoader.LoadTexture(filename);
+            }
+        }
+
+        public int GetTextureNormalMap()
+        {
+            return _textureNormalMapId;
+        }
+
+        public void SetNormalMap(string filename)
+        {
+            if (TextureLoader.IsTextureAlreadyDefined(filename))
+            {
+                _textureNormalMapId = TextureLoader.GetTexture(filename);
+            }
+            else
+            {
+                _textureNormalMapId = TextureLoader.LoadTexture(filename);
             }
         }
 
