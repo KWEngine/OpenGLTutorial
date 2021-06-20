@@ -5,8 +5,10 @@ using System.Text;
 using OpenTK.Graphics.OpenGL4;
 using System.IO;
 using OpenTK.Mathematics;
+using OpenGLTutorial.GameCore;
+using OpenGLTutorial.Primitives;
 
-namespace OpenGLTutorial.ShaderProgramm
+namespace OpenGLTutorial.ShaderProgram
 {
     public static class ShaderStandard
     {
@@ -34,14 +36,14 @@ namespace OpenGLTutorial.ShaderProgramm
             Assembly a = Assembly.GetExecutingAssembly();
 
             // Vertex Shader auslesen:
-            Stream sVertex = a.GetManifestResourceStream("OpenGLTutorial.ShaderProgramm.shaderStandard_vertex.glsl");
+            Stream sVertex = a.GetManifestResourceStream("OpenGLTutorial.ShaderProgram.shaderStandard_vertex.glsl");
             StreamReader sReaderVertex = new StreamReader(sVertex);
             string sVertexCode = sReaderVertex.ReadToEnd();
             sReaderVertex.Dispose();
             sVertex.Close();
 
             // Fragment Shader auslesen:
-            Stream sFragment = a.GetManifestResourceStream("OpenGLTutorial.ShaderProgramm.shaderStandard_fragment.glsl");
+            Stream sFragment = a.GetManifestResourceStream("OpenGLTutorial.ShaderProgram.shaderStandard_fragment.glsl");
             StreamReader sReaderFragment = new StreamReader(sFragment);
             string sFragmentCode = sReaderFragment.ReadToEnd();
             sReaderFragment.Dispose();
@@ -73,6 +75,61 @@ namespace OpenGLTutorial.ShaderProgramm
             _uniformLightPositions = GL.GetUniformLocation(_shaderId, "uLightPositions");
             _uniformAmbientLight = GL.GetUniformLocation(_shaderId, "uAmbientLight");
 
+        }
+
+        public static void Draw(float[] lightpositions, Matrix4 viewProjectionMatrix, GameObject[] objectList)
+        {
+            GL.UseProgram(GetProgramId());
+
+            GL.Uniform3(GetLightPositionsId(), lightpositions.Length / 3, lightpositions);
+            GL.Uniform1(GetLightCountId(), lightpositions.Length / 3);
+            GL.Uniform3(GetAmbientLightId(), 1f, 1f, 1f);
+
+            foreach (GameObject g in objectList)
+            {
+                if (g != null)
+                {
+                    Matrix4 modelMatrix =
+                        Matrix4.CreateScale(new Vector3(g.GetScale().X, g.GetScale().Y, 1))
+                        * Matrix4.CreateFromQuaternion(g.GetRotation())
+                        * Matrix4.CreateTranslation(g.GetPosition().X, g.GetPosition().Y, 0);
+
+                    Matrix4 normalMatrix = Matrix4.Invert(Matrix4.Transpose(modelMatrix));
+
+                    // model-view-projection matrix erstellen:
+                    Matrix4 mvp = modelMatrix * viewProjectionMatrix;
+
+                    GL.UniformMatrix4(GetMatrixId(), false, ref mvp);
+                    GL.UniformMatrix4(GetModelMatrixId(), false, ref modelMatrix);
+                    GL.UniformMatrix4(GetNormalMatrixId(), false, ref normalMatrix);
+
+                    // Texture an den Shader übertragen:
+                    GL.ActiveTexture(TextureUnit.Texture0);
+                    GL.BindTexture(TextureTarget.Texture2D, g.GetTextureId());
+                    GL.Uniform1(GetTextureId(), 0);
+
+                    GL.ActiveTexture(TextureUnit.Texture1);
+                    GL.BindTexture(TextureTarget.Texture2D, g.GetTextureNormalMap());
+                    GL.Uniform1(GetTextureNormalMapId(), 1);
+                    GL.Uniform1(GetTextureNormalMapUseId(), g.GetTextureNormalMap() > 0 ? 1 : 0);
+
+                    GL.BindVertexArray(PrimitiveQuad.GetVAOId());
+                    GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
+                    GL.BindVertexArray(0);
+
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
+                }
+            }
+            GL.UseProgram(0);
+
+
+            foreach (GameObject g in objectList)
+            {
+                if (g != null)
+                {
+
+                }
+            }
         }
 
         public static int GetProgramId()

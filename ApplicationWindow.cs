@@ -7,15 +7,17 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
 using OpenGLTutorial.Primitives;
-using OpenGLTutorial.ShaderProgramm;
+using OpenGLTutorial.ShaderProgram;
 using OpenGLTutorial.Textures;
 using OpenGLTutorial.GameCore;
+using OpenGLTutorial.Schueler;
 
 namespace OpenGLTutorial
 {
     class ApplicationWindow : GameWindow
     {
         private GameWorld _currentWorld = new GameWorld();
+        public static ApplicationWindow CurrentWindow;
 
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera
@@ -23,6 +25,8 @@ namespace OpenGLTutorial
         public ApplicationWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
         {
+            VSync = VSyncMode.Adaptive;
+            CurrentWindow = this;
         }
 
         protected override void OnLoad()
@@ -43,29 +47,61 @@ namespace OpenGLTutorial
             PrimitiveTriangle.Init();
             PrimitiveQuad.Init();
             ShaderStandard.Init();
+            ShaderHUD.Init();
 
             _viewMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
 
+            GameObject[] list = PrepareGameObjectsForTask();
+            int i = 0;
+            while (i < list.Length)
+            {
+                _currentWorld.AddGameObject(list[i]);
+                i++;
+            }
+        }
+
+        private GameObject[] PrepareGameObjectsForTask()
+        {
+            GameObject[] gameObjectList = new GameObject[10];
+
             GameObject g1 = new GameObject();
-            g1.Position = new Vector3(150, 0, 0);
-            g1.SetScale(300, 300, 1);
-            g1.SetTexture("OpenGLTutorial.Textures.metalgrid1_diffuse.png");
-            g1.SetNormalMap("OpenGLTutorial.Textures.metalgrid1_normal.png");
-            _currentWorld.AddGameObject(g1);
-
+            g1.SetPosition(-500, 250);
+            g1.SetScale(100, 50);
+            g1.SetTexture("OpenGLTutorial.Textures.color_blue.bmp");
+            
             GameObject g2 = new GameObject();
-            g2.Position = new Vector3(-150, 0, 0);
-            g2.SetScale(300, 300, 1);
-            g2.SetTexture("OpenGLTutorial.Textures.metalgrid1_diffuse.png");
-            _currentWorld.AddGameObject(g2);
+            g2.SetPosition(-350, 150);
+            g2.SetScale(250, 50);
+            g2.SetTexture("OpenGLTutorial.Textures.color_green.bmp");
 
-            LightObject l1 = new LightObject();
-            l1.Position = new Vector3(0, 0, 1);
-            _currentWorld.AddLightObject(l1);
+            GameObject g3 = new GameObject();
+            g3.SetPosition(-100, 50);
+            g3.SetScale(50, 50);
+            g3.SetTexture("OpenGLTutorial.Textures.color_orange.bmp");
 
-            //LightObject l2 = new LightObject();
-            //l2.Position = new Vector3(-100, 100, 1);
-            //_currentWorld.AddLightObject(l2);
+            GameObject g4 = new GameObject();
+            g4.SetPosition(100, 50);
+            g4.SetScale(200, 50);
+            g4.SetTexture("OpenGLTutorial.Textures.color_red.bmp");
+
+            GameObject g5 = new GameObject();
+            g5.SetPosition(150, -50);
+            g5.SetScale(50, 50);
+            g5.SetTexture("OpenGLTutorial.Textures.color_yellow.bmp");
+
+            GameObject g6 = new GameObject();
+            g6.SetPosition(300, -150);
+            g6.SetScale(300, 50);
+            g6.SetTexture("OpenGLTutorial.Textures.color_pink.bmp");
+
+            gameObjectList[0] = g1;
+            gameObjectList[1] = g2;
+            gameObjectList[2] = g3;
+            gameObjectList[3] = g4;
+            gameObjectList[4] = g5;
+            gameObjectList[5] = g6;
+
+            return gameObjectList;
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -83,53 +119,20 @@ namespace OpenGLTutorial
             // Hier passiert das tatsächliche Zeichnen von Formen (z.B. Dreiecke)
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            // view-projection matrix:
-            Matrix4 viewProjection = _viewMatrix * _projectionMatrix;
+            // Berechne die aktuellen Positionen aller Lichtobjekte und speichere sie in einem Array:
+            float[] lightpositions = _currentWorld.GetLightPositions();
+
+            // Hole die aktuellen Objekte, die gezeichnet werden sollen:
+            GameObject[] aktuelleObjektliste = _currentWorld.GetGameObjects().ToArray();
+
+            // Sortiere sie aufsteigend nach der Position ihrer linken Seite:
+            Schuelermethoden.SortiereDieObjekte(aktuelleObjektliste);
+
+            // Durchlaufe alle Objekte und markiere diejenigen, die potenziell Teil einer Kollision sind:
+            Schuelermethoden.MarkierePotenzielleKollisionskandidaten(aktuelleObjektliste);
 
             // Shader-Programm wählen:
-            GL.UseProgram(ShaderStandard.GetProgramId());
-
-            float[] lightpositions = _currentWorld.GetLightPositions();
-            int lightCount = _currentWorld.GetLightCount();
-
-            GL.Uniform3(ShaderStandard.GetLightPositionsId(), lightCount, lightpositions);
-            GL.Uniform1(ShaderStandard.GetLightCountId(), lightCount);
-            GL.Uniform3(ShaderStandard.GetAmbientLightId(), 0.5f, 0.5f, 0.5f);
-
-            foreach (GameObject g in _currentWorld.GetGameObjects())
-            {
-                Matrix4 modelMatrix = 
-                    Matrix4.CreateScale(g.GetScale()) 
-                    * Matrix4.CreateFromQuaternion(g.GetRotation()) 
-                    * Matrix4.CreateTranslation(g.Position);
-
-                Matrix4 normalMatrix = Matrix4.Invert(Matrix4.Transpose(modelMatrix));
-
-                // model-view-projection matrix erstellen:
-                Matrix4 mvp = modelMatrix * viewProjection;
-
-                GL.UniformMatrix4(ShaderStandard.GetMatrixId(), false, ref mvp);
-                GL.UniformMatrix4(ShaderStandard.GetModelMatrixId(), false, ref modelMatrix);
-                GL.UniformMatrix4(ShaderStandard.GetNormalMatrixId(), false, ref normalMatrix);
-
-                // Texture an den Shader übertragen:
-                GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, g.GetTextureId());
-                GL.Uniform1(ShaderStandard.GetTextureId(), 0);
-
-                GL.ActiveTexture(TextureUnit.Texture1);
-                GL.BindTexture(TextureTarget.Texture2D, g.GetTextureNormalMap());
-                GL.Uniform1(ShaderStandard.GetTextureNormalMapId(), 1);
-                GL.Uniform1(ShaderStandard.GetTextureNormalMapUseId(), g.GetTextureNormalMap() > 0 ? 1 : 0);
-
-                GL.BindVertexArray(PrimitiveQuad.GetVAOId());
-                GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
-                GL.BindVertexArray(0);
-
-                GL.BindTexture(TextureTarget.Texture2D, 0);
-            }
-
-            GL.UseProgram(0);
+            ShaderStandard.Draw(lightpositions, _viewMatrix * _projectionMatrix, aktuelleObjektliste);
 
             SwapBuffers();
         }
@@ -137,12 +140,6 @@ namespace OpenGLTutorial
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
-            // Objekte richten sich je nach Benutzereingaben neu in der Welt aus
-
-            foreach (GameObject g in _currentWorld.GetGameObjects())
-            {
-                g.Update(KeyboardState, MouseState);
-            }
         }
     }
 }

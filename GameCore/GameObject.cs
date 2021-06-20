@@ -10,11 +10,54 @@ namespace OpenGLTutorial.GameCore
 {
     public class GameObject
     {
-        public Vector3 Position = new Vector3(0, 0, 0);
+        private Vector2 Position = new Vector2(0, 0);
         private Quaternion Orientation = new Quaternion(0, 0, 0, 1);
-        private Vector3 Scale = new Vector3(1, 1, 1);
+        private Vector2 Scale = new Vector2(1, 1);
         private int _textureId = -1;
         private int _textureNormalMapId = -1;
+        private int _number = -1;
+        private bool _hasPotentialCollisions = false;
+
+        public void MarkAsCollisionCandidate()
+        {
+            _hasPotentialCollisions = true;
+        }
+
+        public bool IsCollisionCandidate()
+        {
+            return _hasPotentialCollisions;
+        }
+
+        public int GetLeft()
+        {
+            return GetCenterX() - GetWidth() / 2;
+        }
+
+        public int GetRight()
+        {
+            return GetCenterX() + GetWidth() / 2;
+        }
+
+        public int GetTop()
+        {
+            return GetCenterY() + GetHeight() / 2;
+        }
+
+        public int GetBottom()
+        {
+            return GetCenterY() - GetHeight() / 2;
+        }
+
+        public void SetNumber(int n)
+        {
+            if (_number >= 0)
+                _number = n;
+        }
+
+        public int GetNumber()
+        {
+            return _number;
+        }
 
         public int GetTextureId()
         {
@@ -50,22 +93,52 @@ namespace OpenGLTutorial.GameCore
             }
         }
 
-        public void SetScale(float x, float y, float z)
+        public void SetScale(int x, int y)
         {
-            if(x > 0 && y > 0 && z > 0)
+            if(x > 0 && y > 0)
             {
-                Scale = new Vector3(x, y, z);
+                Scale = new Vector2(x, y);
             }
             else
             {
                 // Fehlerfall: entweder Exception oder Fehlermeldung ausgeben!
-                Scale = new Vector3(1, 1, 1);
+                Scale = new Vector2(1, 1);
             }
         }
 
-        public Vector3 GetScale()
+        public int GetWidth()
+        {
+            return (int)Scale.X;
+        }
+
+        public int GetHeight()
+        {
+            return (int)Scale.Y;
+        }
+
+        public Vector2 GetScale()
         {
             return Scale;
+        }
+
+        public void SetPosition(int x, int y)
+        {
+            Position = new Vector2(x, y);
+        }
+
+        public int GetCenterX()
+        {
+            return (int)Position.X;
+        }
+
+        public int GetCenterY()
+        {
+            return (int)Position.Y;
+        }
+
+        public Vector2 GetPosition()
+        {
+            return Position;
         }
 
         public void AddRotation(Axis a, float degrees)
@@ -84,6 +157,8 @@ namespace OpenGLTutorial.GameCore
                 newrotation = Quaternion.FromAxisAngle(Vector3.UnitZ, MathHelper.DegreesToRadians(degrees));
             }
 
+            // Multipliziert man 2 Quaternions miteinander, addieren sich ihre Rotationswerte:
+            // (Man könnte das * also eher wie ein + verstehen)
             Orientation = Orientation * newrotation;
         }
 
@@ -92,25 +167,12 @@ namespace OpenGLTutorial.GameCore
             return Orientation;
         }
 
-        public void Update(KeyboardState k, MouseState s)
+        public virtual void Update(KeyboardState k, MouseState s)
         {
-            if(k[Keys.W])
-            {
-                Position = new Vector3(Position.X, Position.Y + 1, Position.Z);
-            }
-            if (k[Keys.S])
-            {
-                Position = new Vector3(Position.X, Position.Y - 1, Position.Z);
-            }
-            if (k[Keys.A])
-            {
-                Position = new Vector3(Position.X - 1, Position.Y, Position.Z);
-            }
-            if (k[Keys.D])
-            {
-                Position = new Vector3(Position.X + 1, Position.Y, Position.Z);
-            }
+            // TODO: Diese Methode soll später von Unterklassen überschrieben werden können. 
+            //       Deshalb wird sie als 'virtual' markiert. Dies ermöglicht es einer Unterklasse
+            //       die Methode selbst anzulegen und mit Hilfe des 'override'-Keywords dann als
+            //       Überschreibung zu deklarieren!
         }
-
     }
 }

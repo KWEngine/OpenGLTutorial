@@ -1,22 +1,61 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <StartupObject>OpenGLTutorial.Program</StartupObject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="ShaderProgramm\shaderStandard_fragment.glsl" />
-    <None Remove="ShaderProgramm\shaderStandard_vertex.glsl" />
+    <None Remove="ShaderProgram\shaderHUD_fragment.glsl" />
+    <None Remove="ShaderProgram\shaderHUD_vertex.glsl" />
+    <None Remove="ShaderProgram\shaderStandard_fragment.glsl" />
+    <None Remove="ShaderProgram\shaderStandard_vertex.glsl" />
+    <None Remove="Textures\color_blue.bmp" />
+    <None Remove="Textures\color_green.bmp" />
+    <None Remove="Textures\color_orange.bmp" />
+    <None Remove="Textures\color_pink.bmp" />
+    <None Remove="Textures\color_red.bmp" />
+    <None Remove="Textures\color_yellow.bmp" />
     <None Remove="Textures\crate.jpg" />
+    <None Remove="Textures\font.dds" />
     <None Remove="Textures\metalgrid1_diffuse.png" />
     <None Remove="Textures\metalgrid1_normal.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="ShaderProgramm\shaderStandard_fragment.glsl" />
-    <EmbeddedResource Include="ShaderProgramm\shaderStandard_vertex.glsl" />
+    <EmbeddedResource Include="ShaderProgram\shaderHUD_fragment.glsl" />
+    <EmbeddedResource Include="ShaderProgram\shaderStandard_fragment.glsl" />
+    <EmbeddedResource Include="ShaderProgram\shaderHUD_vertex.glsl" />
+    <EmbeddedResource Include="ShaderProgram\shaderStandard_vertex.glsl" />
+    <EmbeddedResource Include="Textures\color_orange.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Textures\color_blue.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Textures\color_green.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Textures\color_red.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Textures\color_pink.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Textures\color_yellow.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Textures\crate.jpg" />
+    <EmbeddedResource Include="Textures\font.dds" />
     <EmbeddedResource Include="Textures\metalgrid1_diffuse.png" />
     <EmbeddedResource Include="Textures\metalgrid1_normal.png" />
   </ItemGroup>
