@@ -133,6 +133,9 @@ namespace OpenGLTutorial
             // Shader-Programm wählen:
             ShaderStandard.Draw(lightpositions, _viewMatrix * _projectionMatrix, aktuelleObjektliste);
 
+            // Shader-Programm für Nummerierung wählen:
+            ShaderHUD.Draw(aktuelleObjektliste);
+
             SwapBuffers();
         }
 

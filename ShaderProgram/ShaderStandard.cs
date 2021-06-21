@@ -127,19 +127,7 @@ namespace OpenGLTutorial.ShaderProgram
             }
             GL.UseProgram(0);
 
-            GL.Disable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.Blend);
             
-            for (int i = 0; i < objectList.Length; i++)
-            {
-                GameObject g = objectList[i];
-                if (g != null)
-                {
-                    ShaderHUD.Draw("" + i, g.GetCenterX(), g.GetCenterY(), g.IsCollisionCandidate());
-                }
-            }
-            GL.Disable(EnableCap.Blend);
-            GL.Enable(EnableCap.DepthTest);
         }
 
         public static int GetProgramId()

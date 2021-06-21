@@ -6,7 +6,7 @@ using System.IO;
 namespace OpenGLTutorial.Textures
 {
     #region HelperDDS Class
-    internal class HelperDDS : IDisposable
+    internal class TextureHelperDDS : IDisposable
     {
         #region Variables
         private bool m_isValid = false;
@@ -24,7 +24,7 @@ namespace OpenGLTutorial.Textures
         #endregion
 
         #region Constructor/Destructor
-        public HelperDDS(byte[] ddsImage)
+        public TextureHelperDDS(byte[] ddsImage)
         {
             if (ddsImage == null) return;
             if (ddsImage.Length == 0) return;
@@ -41,7 +41,7 @@ namespace OpenGLTutorial.Textures
             }
         }
 
-        public HelperDDS(Stream ddsImage)
+        public TextureHelperDDS(Stream ddsImage)
         {
             if (ddsImage == null) return;
             if (!ddsImage.CanRead) return;
@@ -52,7 +52,7 @@ namespace OpenGLTutorial.Textures
             }
         }
 
-        private HelperDDS(System.Drawing.Bitmap bitmap)
+        private TextureHelperDDS(System.Drawing.Bitmap bitmap)
         {
             this.m_bitmap = bitmap;
         }
@@ -1819,12 +1819,12 @@ namespace OpenGLTutorial.Textures
         #endregion
 
         #region Operators
-        public static implicit operator HelperDDS(System.Drawing.Bitmap value)
+        public static implicit operator TextureHelperDDS(System.Drawing.Bitmap value)
         {
-            return new HelperDDS(value);
+            return new TextureHelperDDS(value);
         }
 
-        public static explicit operator System.Drawing.Bitmap(HelperDDS value)
+        public static explicit operator System.Drawing.Bitmap(TextureHelperDDS value)
         {
             return value.BitmapImage;
         }

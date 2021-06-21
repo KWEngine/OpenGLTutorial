@@ -79,14 +79,10 @@ namespace OpenGLTutorial.ShaderProgram
             return (int)input[0] - 32;
         }
 
-        public static void Draw(string input, int x, int y, bool isCollisionCandidate)
+        private static void DrawInternal(string input, int x, int y, bool isCollisionCandidate)
         {
             if (input.Length == 1)
             {
-                ErrorChecker.Check();
-
-                GL.UseProgram(_shaderId);
-
                 Matrix4 modelMatrix = Matrix4.CreateScale(32) * Matrix4.CreateTranslation(x, y, 0);
                 // model-view-projection matrix erstellen:
                 Matrix4 mvp = modelMatrix * _viewProjectionMatrix;
@@ -97,21 +93,38 @@ namespace OpenGLTutorial.ShaderProgram
 
                 GL.Uniform1(_uniformCollider, isCollisionCandidate ? 1 : 0);
 
-                // Texture an den Shader übertragen:
-                GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, _textureID);
-                GL.Uniform1(_uniformTexture, 0);
-
                 GL.BindVertexArray(PrimitiveQuad.GetVAOId());
                 GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
                 GL.BindVertexArray(0);
-
-                GL.BindTexture(TextureTarget.Texture2D, 0);
-
-                GL.UseProgram(0);
-
-                ErrorChecker.Check();
             }
+        }
+        public static void Draw(GameObject[] objektliste)
+        {
+            GL.Disable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Blend);
+
+            GL.UseProgram(_shaderId);
+
+            // Texture an den Shader übertragen:
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, _textureID);
+            GL.Uniform1(_uniformTexture, 0);
+
+            for (int i = 0; i < objektliste.Length; i++)
+            {
+                GameObject g = objektliste[i];
+                if (g != null)
+                {
+                    DrawInternal("" + i, g.GetCenterX(), g.GetCenterY(), g.IsCollisionCandidate());
+                }
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            GL.UseProgram(0);
+
+            GL.Disable(EnableCap.Blend);
+            GL.Enable(EnableCap.DepthTest);
         }
     }
 }

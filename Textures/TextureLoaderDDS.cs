@@ -15,9 +15,9 @@ namespace OpenGLTutorial.Textures
         {
             int texID = -1;
             bool error = false;
-            using (HelperDDS dds = new HelperDDS(s))
+            using (TextureHelperDDS dds = new TextureHelperDDS(s))
             {
-                if (dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT1 || dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT3 || dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT5)
+                if (dds.DDSPixelFormat == TextureHelperDDS.PixelFormat.DXT1 || dds.DDSPixelFormat == TextureHelperDDS.PixelFormat.DXT3 || dds.DDSPixelFormat == TextureHelperDDS.PixelFormat.DXT5)
                 {
 
                     texID = GL.GenTexture();
@@ -29,7 +29,7 @@ namespace OpenGLTutorial.Textures
                     GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
                     GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
                     GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-                    GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT1 ? InternalFormat.CompressedRgbaS3tcDxt1Ext : dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT3 ? InternalFormat.CompressedRgbaS3tcDxt3Ext : InternalFormat.CompressedRgbaS3tcDxt5Ext, dds.BitmapImage.Width, dds.BitmapImage.Height, 0, dds.Data.Length, dds.Data);
+                    GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, dds.DDSPixelFormat == TextureHelperDDS.PixelFormat.DXT1 ? InternalFormat.CompressedRgbaS3tcDxt1Ext : dds.DDSPixelFormat == TextureHelperDDS.PixelFormat.DXT3 ? InternalFormat.CompressedRgbaS3tcDxt3Ext : InternalFormat.CompressedRgbaS3tcDxt5Ext, dds.BitmapImage.Width, dds.BitmapImage.Height, 0, dds.Data.Length, dds.Data);
 
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                 }
