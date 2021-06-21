@@ -24,7 +24,7 @@ namespace OpenGLTutorial.Schueler
         /// <param name="objektArray">Die zu untersuchenden GameObject-Instanzen in einem Array</param>
         public static void MarkierePotenzielleKollisionskandidaten (GameObject[] objektArray)
         {
-
+           
         }
     }
 }

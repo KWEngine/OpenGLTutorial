@@ -79,6 +79,8 @@ namespace OpenGLTutorial.ShaderProgram
 
         public static void Draw(float[] lightpositions, Matrix4 viewProjectionMatrix, GameObject[] objectList)
         {
+            ErrorChecker.Check();
+
             GL.UseProgram(GetProgramId());
 
             GL.Uniform3(GetLightPositionsId(), lightpositions.Length / 3, lightpositions);
@@ -109,27 +111,31 @@ namespace OpenGLTutorial.ShaderProgram
                     GL.Uniform1(GetTextureId(), 0);
 
                     GL.ActiveTexture(TextureUnit.Texture1);
-                    GL.BindTexture(TextureTarget.Texture2D, g.GetTextureNormalMap());
+                    int normalMapId = g.GetTextureNormalMap();
+                    GL.BindTexture(TextureTarget.Texture2D, normalMapId > 0 ? normalMapId : ApplicationWindow.TextureDefault);
                     GL.Uniform1(GetTextureNormalMapId(), 1);
-                    GL.Uniform1(GetTextureNormalMapUseId(), g.GetTextureNormalMap() > 0 ? 1 : 0);
+                    GL.Uniform1(GetTextureNormalMapUseId(), normalMapId > 0 ? 1 : 0);
 
                     GL.BindVertexArray(PrimitiveQuad.GetVAOId());
                     GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
                     GL.BindVertexArray(0);
 
                     GL.BindTexture(TextureTarget.Texture2D, 0);
+
+                    ErrorChecker.Check();
                 }
             }
             GL.UseProgram(0);
 
             GL.Disable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            foreach (GameObject g in objectList)
+            
+            for (int i = 0; i < objectList.Length; i++)
             {
+                GameObject g = objectList[i];
                 if (g != null)
                 {
-                    ShaderHUD.Draw("A", g.GetCenterX(), g.GetCenterY());
+                    ShaderHUD.Draw("" + i, g.GetCenterX(), g.GetCenterY(), g.IsCollisionCandidate());
                 }
             }
             GL.Disable(EnableCap.Blend);

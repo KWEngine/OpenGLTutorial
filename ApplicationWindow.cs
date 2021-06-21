@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenTK;
-using OpenTK.Mathematics;
-using OpenTK.Graphics.OpenGL4;
-using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.Common;
+﻿using OpenGLTutorial.GameCore;
 using OpenGLTutorial.Primitives;
+using OpenGLTutorial.Schueler;
 using OpenGLTutorial.ShaderProgram;
 using OpenGLTutorial.Textures;
-using OpenGLTutorial.GameCore;
-using OpenGLTutorial.Schueler;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
 
 namespace OpenGLTutorial
 {
@@ -18,6 +14,7 @@ namespace OpenGLTutorial
     {
         private GameWorld _currentWorld = new GameWorld();
         public static ApplicationWindow CurrentWindow;
+        public static int TextureDefault;
 
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera
@@ -27,6 +24,7 @@ namespace OpenGLTutorial
         {
             VSync = VSyncMode.Adaptive;
             CurrentWindow = this;
+            TextureDefault = TextureLoader.LoadTexture("OpenGLTutorial.Textures.color_white.bmp");
         }
 
         protected override void OnLoad()
@@ -41,6 +39,7 @@ namespace OpenGLTutorial
             GL.Enable(EnableCap.CullFace); // Zeichnen von verdeckten Teilen eines Objekts verhindern
             GL.CullFace(CullFaceMode.Back); // Der Kamera abgewandte Flächen werden ignoriert
             GL.FrontFace(FrontFaceDirection.Ccw);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
@@ -62,44 +61,44 @@ namespace OpenGLTutorial
 
         private GameObject[] PrepareGameObjectsForTask()
         {
-            GameObject[] gameObjectList = new GameObject[10];
+            GameObject[] gameObjectList = new GameObject[6];
 
-            GameObject g1 = new GameObject();
-            g1.SetPosition(-500, 250);
-            g1.SetScale(100, 50);
-            g1.SetTexture("OpenGLTutorial.Textures.color_blue.bmp");
+            GameObject g0 = new GameObject();
+            g0.SetPosition(-500, 250);
+            g0.SetScale(100, 50);
+            g0.SetTexture("OpenGLTutorial.Textures.color_blue.bmp");
             
+            GameObject g1 = new GameObject();
+            g1.SetPosition(-350, 150);
+            g1.SetScale(250, 50);
+            g1.SetTexture("OpenGLTutorial.Textures.color_green.bmp");
+
             GameObject g2 = new GameObject();
-            g2.SetPosition(-350, 150);
-            g2.SetScale(250, 50);
-            g2.SetTexture("OpenGLTutorial.Textures.color_green.bmp");
+            g2.SetPosition(-100, 50);
+            g2.SetScale(50, 50);
+            g2.SetTexture("OpenGLTutorial.Textures.color_orange.bmp");
 
             GameObject g3 = new GameObject();
-            g3.SetPosition(-100, 50);
-            g3.SetScale(50, 50);
-            g3.SetTexture("OpenGLTutorial.Textures.color_orange.bmp");
+            g3.SetPosition(100, 50);
+            g3.SetScale(200, 50);
+            g3.SetTexture("OpenGLTutorial.Textures.color_red.bmp");
 
             GameObject g4 = new GameObject();
-            g4.SetPosition(100, 50);
-            g4.SetScale(200, 50);
-            g4.SetTexture("OpenGLTutorial.Textures.color_red.bmp");
+            g4.SetPosition(150, -50);
+            g4.SetScale(50, 50);
+            g4.SetTexture("OpenGLTutorial.Textures.color_yellow.bmp");
 
             GameObject g5 = new GameObject();
-            g5.SetPosition(150, -50);
-            g5.SetScale(50, 50);
-            g5.SetTexture("OpenGLTutorial.Textures.color_yellow.bmp");
+            g5.SetPosition(300, -150);
+            g5.SetScale(300, 50);
+            g5.SetTexture("OpenGLTutorial.Textures.color_pink.bmp");
 
-            GameObject g6 = new GameObject();
-            g6.SetPosition(300, -150);
-            g6.SetScale(300, 50);
-            g6.SetTexture("OpenGLTutorial.Textures.color_pink.bmp");
-
-            gameObjectList[0] = g1;
-            gameObjectList[1] = g2;
-            gameObjectList[2] = g3;
-            gameObjectList[3] = g4;
-            gameObjectList[4] = g5;
-            gameObjectList[5] = g6;
+            gameObjectList[0] = g4;
+            gameObjectList[1] = g1;
+            gameObjectList[2] = g5;
+            gameObjectList[3] = g0;
+            gameObjectList[4] = g3;
+            gameObjectList[5] = g2;
 
             return gameObjectList;
         }

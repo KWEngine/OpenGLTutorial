@@ -24,6 +24,7 @@
     <None Remove="Textures\color_orange.bmp" />
     <None Remove="Textures\color_pink.bmp" />
     <None Remove="Textures\color_red.bmp" />
+    <None Remove="Textures\color_white.bmp" />
     <None Remove="Textures\color_yellow.bmp" />
     <None Remove="Textures\crate.jpg" />
     <None Remove="Textures\font.dds" />
@@ -49,6 +50,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Textures\color_pink.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Textures\color_white.bmp">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Textures\color_yellow.bmp">

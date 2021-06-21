@@ -24,6 +24,7 @@ namespace OpenGLTutorial.ShaderProgram
         private static int _uniformCharacterOffset = -1;
 
         private static int _uniformTexture = -1;
+        private static int _uniformCollider = -1;
         private static int _textureID = -1;
 
         public static void Init()
@@ -47,12 +48,11 @@ namespace OpenGLTutorial.ShaderProgram
             sReaderFragment.Dispose();
             sFragment.Close();
 
-            Stream ddsStream = a.GetManifestResourceStream("OpenGLTutorial.Textures.font.dds");
-            byte[] streamData = new byte[ddsStream.Length];
-            ddsStream.Read(streamData, 0, streamData.Length);
-            TextureLoaderDDS.TryLoadDDS(streamData, false, out _textureID, out int tWidth, out int tHeight);
-            ddsStream.Close();
-            streamData = null;
+            using (Stream s = a.GetManifestResourceStream("OpenGLTutorial.Textures.font.dds"))
+            {
+                _textureID = TextureLoaderDDS.LoadFont(s);
+            }
+
 
             _vertexShaderId = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(_vertexShaderId, sVertexCode);
@@ -71,17 +71,20 @@ namespace OpenGLTutorial.ShaderProgram
             _uniformMatrix = GL.GetUniformLocation(_shaderId, "uMatrix");
             _uniformCharacterOffset = GL.GetUniformLocation(_shaderId, "uOffset");
             _uniformTexture = GL.GetUniformLocation(_shaderId, "uTexture");
+            _uniformCollider = GL.GetUniformLocation(_shaderId, "uIsCollider");
         }
 
-        private static float CalculateOffsetFor(string input)
+        private static int CalculateOffsetFor(string input)
         {
-            return 1;
+            return (int)input[0] - 32;
         }
 
-        public static void Draw(string input, int x, int y)
+        public static void Draw(string input, int x, int y, bool isCollisionCandidate)
         {
             if (input.Length == 1)
             {
+                ErrorChecker.Check();
+
                 GL.UseProgram(_shaderId);
 
                 Matrix4 modelMatrix = Matrix4.CreateScale(32) * Matrix4.CreateTranslation(x, y, 0);
@@ -89,9 +92,10 @@ namespace OpenGLTutorial.ShaderProgram
                 Matrix4 mvp = modelMatrix * _viewProjectionMatrix;
                 GL.UniformMatrix4(_uniformMatrix, false, ref mvp);
 
-                float offsetX = CalculateOffsetFor(input);
-
+                int offsetX = CalculateOffsetFor(input);
                 GL.Uniform1(_uniformCharacterOffset, offsetX);
+
+                GL.Uniform1(_uniformCollider, isCollisionCandidate ? 1 : 0);
 
                 // Texture an den Shader übertragen:
                 GL.ActiveTexture(TextureUnit.Texture0);
@@ -105,6 +109,8 @@ namespace OpenGLTutorial.ShaderProgram
                 GL.BindTexture(TextureTarget.Texture2D, 0);
 
                 GL.UseProgram(0);
+
+                ErrorChecker.Check();
             }
         }
     }
