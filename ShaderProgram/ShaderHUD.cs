@@ -84,7 +84,7 @@ namespace OpenGLTutorial.ShaderProgram
             {
                 GL.UseProgram(_shaderId);
 
-                Matrix4 modelMatrix = Matrix4.CreateScale(64) * Matrix4.CreateTranslation(x, y, 0);
+                Matrix4 modelMatrix = Matrix4.CreateScale(32) * Matrix4.CreateTranslation(x, y, 0);
                 // model-view-projection matrix erstellen:
                 Matrix4 mvp = modelMatrix * _viewProjectionMatrix;
                 GL.UniformMatrix4(_uniformMatrix, false, ref mvp);
