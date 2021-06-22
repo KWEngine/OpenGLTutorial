@@ -24,7 +24,13 @@ namespace OpenGLTutorial.Schueler
         /// <param name="objektArray">Die zu untersuchenden GameObject-Instanzen in einem Array</param>
         public static void MarkierePotenzielleKollisionskandidaten (GameObject[] objektArray)
         {
-           
+           // TODO: Hier müssen alle Objekte des Arrays durchlaufen werden.
+           //       Für jedes Objekt im Array wird geprüft, ob eines der nachfolgenden Objekte im Array
+           //       mit ihm kollidieren könnte. Ist dies der Fall, werden beide Objekte als potenzielle
+           //       Kollisionskandidaten markiert. Ist ein dem zu testenden Objekt nachfolgendes Objekt
+           //       kein Kollisionskandidat, so kann dank der vorherigen Sortierung angenommen werden,
+           //       dass auch alle weiteren Objekte rechts davon nicht mit dem Objekt kollidieren können.
+           //       Anschließend wird das nächste Objekt betrachtet.
         }
     }
 }
