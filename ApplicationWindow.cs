@@ -10,55 +10,79 @@ using OpenTK.Windowing.Desktop;
 
 namespace OpenGLTutorial
 {
+    /// <summary>
+    /// Das ApplicationWindow ist das Herzstück der Anwendung. Hier werden alle nötigen Einstellungen
+    /// vorgenommen und das Grundgerüst der OpenGL-API initialisiert.
+    /// Hier finden sich auch die beiden Methoden OnRenderFrame() und OnUpdateFrame(), die für das
+    /// Rendern und Bewegen der Objekte zuständig sind.
+    /// </summary>
     class ApplicationWindow : GameWindow
     {
-        private GameWorld _currentWorld = new GameWorld();
-        public static ApplicationWindow CurrentWindow;
-        public static int TextureDefault;
+        private GameWorld _currentWorld = new GameWorld();      // Erstellt eine Welt, die vom Fenster gezeigt wird
+        public static ApplicationWindow CurrentWindow;          // Globales Feld, das von allen Objekten genutzt werden kann, um das Fenster anzusprechen
+        public static int TextureDefault;                       // ID einer Textureinheit, die verwendet wird, wenn eine andere Textur nicht gefunden werden kann
 
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
-        private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera
+        private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera (Position, Neigung, etc.)
 
+        /// <summary>
+        /// Konstruktormethode des OpenGL-Fensters
+        /// </summary>
+        /// <param name="gameWindowSettings">Spieleinstellungen</param>
+        /// <param name="nativeWindowSettings">Fenstereinstellungen</param>
         public ApplicationWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            VSync = VSyncMode.Adaptive;
-            CurrentWindow = this;
-            TextureDefault = TextureLoader.LoadTexture("OpenGLTutorial.Textures.color_white.bmp");
+            VSync = VSyncMode.Adaptive;                         // Aktiviere VSync
+            CurrentWindow = this;                               // Setze den globalen Fensterzeiger auf das aktuelle Fenster
+            TextureDefault = TextureLoader.LoadTexture("OpenGLTutorial.Textures.color_white.bmp");  // Lade die Standardtextur (weiße Farbe)
         }
 
+        /// <summary>
+        /// Diese Methode wird automatisch aufgerufen, sobald das Fenster erstellt wird (im Anschluss an die Konstruktormethode).
+        /// Sie initialisiert die Geometriedaten, stellt grundlegende OpenGL-Parameter ein und fügt ein paar Beispielobjekte 
+        /// in die aktuelle Spielwelt ein.
+        /// </summary>
         protected override void OnLoad()
         {
-            base.OnLoad();
+            base.OnLoad();                                          // Aufruf der OnLoad()-Methode der Oberklasse
+                                                                    // (i.d.R. sollte diese Methode leer sein)
 
-            // Basis-OpenGL-Aktionen (wie z.B. grundlegende Einstellungen) ausführen!
-            GL.ClearColor(0, 0, 0, 1); // Farbe des gelöschten Bildschirms wählen
+            GL.ClearColor(0, 0, 0, 1);                              // Farbe des leeren Bildschirms wählen
 
-            GL.Enable(EnableCap.DepthTest); // Tiefenpuffer aktivieren
+            GL.Enable(EnableCap.DepthTest);                         // Tiefenpuffer (welches Objekt liegt vor welchem?) aktivieren
 
-            GL.Enable(EnableCap.CullFace); // Zeichnen von verdeckten Teilen eines Objekts verhindern
-            GL.CullFace(CullFaceMode.Back); // Der Kamera abgewandte Flächen werden ignoriert
-            GL.FrontFace(FrontFaceDirection.Ccw);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.CullFace);                          // Zeichnen von bestimmten Seiten eines Objekts verhindern:
+            GL.CullFace(CullFaceMode.Back);                         // Der Kamera abgewandte Seiten werden ignoriert
+            GL.FrontFace(FrontFaceDirection.Ccw);                   // Ob eine Seite eine Vor- oder Rückseite ist, entscheidet die Aufzählung ihrer Eckpunkte
+            GL.BlendFunc(                                           // Wenn ein Objekt transparent ist, wird hier festgelegt, wie genau es mit anderen
+                BlendingFactor.SrcAlpha,                            // Objekten verrechnet werden soll
+                BlendingFactor.OneMinusSrcAlpha
+                );
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);   // Aktiviert den Hauptbildschirm (ID 0) als Renderziel
 
-            PrimitiveTriangle.Init();
-            PrimitiveQuad.Init();
-            ShaderStandard.Init();
-            ShaderHUD.Init();
+            PrimitiveTriangle.Init();                               // Initialisiert die Geometrie für Dreiecke
+            PrimitiveQuad.Init();                                   // Initialisiert die Geometrie für Quadrate
+            ShaderStandard.Init();                                  // Initialisiert das Hauptrenderprogramm (Shader)
+            ShaderHUD.Init();                                       // Initialisiert das HUD-Renderprogramm  (Shader)
 
-            _viewMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
+            _viewMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);// Initialisiert die Kameraeinstellungen (Blick entlang der Z-Achse)
 
-            GameObject[] list = PrepareGameObjectsForTask();
+            GameObject[] list = PrepareGameObjectsForTask();        // Erstellt eine Liste von Beispielobjekten...
             int i = 0;
             while (i < list.Length)
             {
-                _currentWorld.AddGameObject(list[i]);
+                _currentWorld.AddGameObject(list[i]);               // ...und fügt jedes Objekt der Spielwelt hinzu
                 i++;
             }
         }
 
+
+        /// <summary>
+        /// Erstellt Beispielobjekte, die später in der Welt zu finden sind (für die Aufgabe auf 6 reduziert)
+        /// </summary>
+        /// <returns>Array mit den erstellten GameObject-Instanzen</returns>
         private GameObject[] PrepareGameObjectsForTask()
         {
             GameObject[] gameObjectList = new GameObject[6];
@@ -103,15 +127,25 @@ namespace OpenGLTutorial
             return gameObjectList;
         }
 
+        /// <summary>
+        /// Wird immer dann ausgeführt, wenn der Benutzer das Fenster in seiner Größe verändert
+        /// </summary>
+        /// <param name="e">Zusätzliche Informationen zum Resize-Event</param>
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
-            // Anpassung der 3D-Instanzen an die neue Fenstergröße
 
+            // Anpassung der 3D-Instanzen an die neue Fenstergröße:
              GL.Viewport(0, 0, Size.X, Size.Y);
             _projectionMatrix = Matrix4.CreateOrthographic(Size.X, Size.Y, 0.1f, 1000f);
         }
 
+        /// <summary>
+        /// Die Methode wird periodisch aufgerufen und zeichnet die aktuelle Spielszene komplett neu. 
+        /// Bei einem 60Hz-Monitor 60x pro Sekunde. Bei einem 140Hz-Monitor 140x pro Sekunde usw.!
+        /// Für 60fps darf die Ausführung des Codes von OnRenderFrame() und OnUpdateFrame() zusammen nicht länger als 16ms dauern.
+        /// </summary>
+        /// <param name="args">Zusätzliche Informationen zum Render-Event</param>
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             base.OnRenderFrame(args);
@@ -139,8 +173,16 @@ namespace OpenGLTutorial
             SwapBuffers();
         }
 
+        /// <summary>
+        /// Die Methode wird periodisch aufgerufen und aktualisiert (später) alle Objekte der aktuellen Spielszene.
+        /// Bei einem 60Hz-Monitor 60x pro Sekunde. Bei einem 140Hz-Monitor 140x pro Sekunde usw.!
+        /// Für 60fps darf die Ausführung des Codes von OnRenderFrame() und OnUpdateFrame() zusammen nicht länger als 16ms dauern.
+        /// </summary>
+        /// <param name="args">Zusätzliche Informationen zum Update-Event</param>
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
+            // Hier ist aktuell noch nichts enthalten. Später würde man hier in einer Schleife alle GameObject-Instanzen
+            // fragen, ob sie sich bewegen 'möchten' und sie entsprechend der Benutzereingaben oder ihrer AI versetzen/rotieren/skalieren:
             base.OnUpdateFrame(args);
         }
     }
