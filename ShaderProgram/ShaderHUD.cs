@@ -53,7 +53,6 @@ namespace OpenGLTutorial.ShaderProgram
                 _textureID = TextureLoaderDDS.LoadFont(s);
             }
 
-
             _vertexShaderId = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(_vertexShaderId, sVertexCode);
 
@@ -84,7 +83,6 @@ namespace OpenGLTutorial.ShaderProgram
             if (input.Length == 1)
             {
                 Matrix4 modelMatrix = Matrix4.CreateScale(32) * Matrix4.CreateTranslation(x, y, 0);
-                // model-view-projection matrix erstellen:
                 Matrix4 mvp = modelMatrix * _viewProjectionMatrix;
                 GL.UniformMatrix4(_uniformMatrix, false, ref mvp);
 
@@ -105,7 +103,6 @@ namespace OpenGLTutorial.ShaderProgram
 
             GL.UseProgram(_shaderId);
 
-            // Texture an den Shader übertragen:
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, _textureID);
             GL.Uniform1(_uniformTexture, 0);

@@ -29,6 +29,9 @@ namespace OpenGLTutorial.ShaderProgram
         private static int _uniformLightPositions = -1;
         private static int _uniformAmbientLight = -1;
 
+        /// <summary>
+        /// Initialisiert das Hauptrenderprogramm (Shader)
+        /// </summary>
         public static void Init()
         {
             _shaderId = GL.CreateProgram();
@@ -77,57 +80,72 @@ namespace OpenGLTutorial.ShaderProgram
 
         }
 
+        /// <summary>
+        /// Zeichnet die aktuelle Szene, indem sie die Lichtdaten, Kamera- und Bildschirmeinstellungen, sowie die aktuell zu zeichnenden Objekte übergeben bekommt.
+        /// </summary>
+        /// <param name="lightpositions">Lichtdaten (Lichtpositionen [x][y][z][x][y][z]...)</param>
+        /// <param name="viewProjectionMatrix">Matrix, die Kameraposition und FOV enthält</param>
+        /// <param name="objectList">Array mit den zu zeichnenden Objekten</param>
         public static void Draw(float[] lightpositions, Matrix4 viewProjectionMatrix, GameObject[] objectList)
         {
-            ErrorChecker.Check();
-
+            // Aktiviere auf der GPU das richtige Renderprogramm:
             GL.UseProgram(GetProgramId());
 
+            // Übertrage Lichtpositionen und die Farbe des Umgebungslichts an die GPU:
             GL.Uniform3(GetLightPositionsId(), lightpositions.Length / 3, lightpositions);
             GL.Uniform1(GetLightCountId(), lightpositions.Length / 3);
             GL.Uniform3(GetAmbientLightId(), 1f, 1f, 1f);
 
+            // Durchlaufe jedes zu zeichnende Objekt:
             foreach (GameObject g in objectList)
             {
                 if (g != null)
                 {
+                    // Erstelle aus Skalierung, Rotation und Position des aktuellen Objekts
+                    // eine Matrix:
                     Matrix4 modelMatrix =
                         Matrix4.CreateScale(new Vector3(g.GetScale().X, g.GetScale().Y, 1))
                         * Matrix4.CreateFromQuaternion(g.GetRotation())
                         * Matrix4.CreateTranslation(g.GetPosition().X, g.GetPosition().Y, 0);
 
+                    // Für Lichtreflektionen muss aus der Model-Matrix die Normal-Matrix berechnet werden:
                     Matrix4 normalMatrix = Matrix4.Invert(Matrix4.Transpose(modelMatrix));
 
-                    // model-view-projection matrix erstellen:
+                    // Model-View-Projection matrix erstellen (Kombi aus Model-Matrix und View-Projection-Matrix):
                     Matrix4 mvp = modelMatrix * viewProjectionMatrix;
 
+                    // Übertrage die Matrizen an die GPU:
                     GL.UniformMatrix4(GetMatrixId(), false, ref mvp);
                     GL.UniformMatrix4(GetModelMatrixId(), false, ref modelMatrix);
                     GL.UniformMatrix4(GetNormalMatrixId(), false, ref normalMatrix);
 
-                    // Texture an den Shader übertragen:
+                    // Textur an die GPU übertragen:
                     GL.ActiveTexture(TextureUnit.Texture0);
                     GL.BindTexture(TextureTarget.Texture2D, g.GetTextureId());
                     GL.Uniform1(GetTextureId(), 0);
 
+                    // Normal-Map-Textur an die GPU übertragen:
                     GL.ActiveTexture(TextureUnit.Texture1);
                     int normalMapId = g.GetTextureNormalMap();
                     GL.BindTexture(TextureTarget.Texture2D, normalMapId > 0 ? normalMapId : ApplicationWindow.TextureDefault);
                     GL.Uniform1(GetTextureNormalMapId(), 1);
+                    // Die GPU kann nicht entscheiden, ob eine Textur valide ist oder nicht. Daher muss man ihr
+                    // für die optionale Normal-Map noch mit 1 oder 0 mitteilen, ob es eine gibt. Der Shader-Code
+                    // fragt diesen Wert dann ab, bevor auf diese Textur zugegriffen wird:
                     GL.Uniform1(GetTextureNormalMapUseId(), normalMapId > 0 ? 1 : 0);
 
+                    // Übertrage die Geometriedaten (Eckpunkte, etc.) des Quadrats an die GPU:
                     GL.BindVertexArray(PrimitiveQuad.GetVAOId());
                     GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
+
+                    // Teile der GPU mit, dass die Geometrie- und Texturdaten nicht mehr benötigt werden:
                     GL.BindVertexArray(0);
-
                     GL.BindTexture(TextureTarget.Texture2D, 0);
-
-                    ErrorChecker.Check();
                 }
             }
-            GL.UseProgram(0);
 
-            
+            // Deaktiviere das aktuell gewählte Renderprogramm (0 ist fast immer eine ungültige ID in OpenGL):
+            GL.UseProgram(0);
         }
 
         public static int GetProgramId()

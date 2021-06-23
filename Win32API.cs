@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Runtime.InteropServices;
 
 namespace OpenGLTutorial
 {
     public static class Win32API
     {
+        // Hier wird die Systembibliothek (in C++ geschrieben) 'angezapft', bzw.
+        // eigentlich nur die Methode 'EnumDisplaySettings()', die die Einstellungen
+        // eines Bildschirms analysiert und in einem Objekt vom Typ DEVMODE (device mode)
+        // speichert.
         [DllImport("user32.dll")]
         private static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
 
+
+        // Das struct (eine Art Klasse) kapselt alle zum Bildschirm gehörenden Eigenschaften:        
         [StructLayout(LayoutKind.Sequential)]
         private struct DEVMODE
         {
