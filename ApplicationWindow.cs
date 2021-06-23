@@ -7,6 +7,7 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using System;
 
 namespace OpenGLTutorial
 {
@@ -25,6 +26,9 @@ namespace OpenGLTutorial
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera (Position, Neigung, etc.)
 
+        private string _windowTitle = "";
+        private uint _frameCounter = 0;
+
         /// <summary>
         /// Konstruktormethode des OpenGL-Fensters
         /// </summary>
@@ -33,9 +37,10 @@ namespace OpenGLTutorial
         public ApplicationWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            VSync = VSyncMode.Adaptive;                         // Aktiviere VSync
+            VSync = VSyncMode.Off;                              // Deaktiviere VSync
             CurrentWindow = this;                               // Setze den globalen Fensterzeiger auf das aktuelle Fenster
             TextureDefault = TextureLoader.LoadTexture("OpenGLTutorial.Textures.color_white.bmp");  // Lade die Standardtextur (weiße Farbe)
+            _windowTitle = nativeWindowSettings.Title;
         }
 
         /// <summary>
@@ -45,8 +50,7 @@ namespace OpenGLTutorial
         /// </summary>
         protected override void OnLoad()
         {
-            base.OnLoad();                                          // Aufruf der OnLoad()-Methode der Oberklasse
-                                                                    // (i.d.R. sollte diese Methode leer sein)
+            base.OnLoad();                                          // Aufruf der OnLoad()-Methode der Oberklasse                                             // (i.d.R. sollte diese Methode leer sein)
 
             GL.ClearColor(0, 0, 0, 1);                              // Farbe des leeren Bildschirms wählen
 
@@ -88,32 +92,32 @@ namespace OpenGLTutorial
             GameObject[] gameObjectList = new GameObject[6];
 
             GameObject g0 = new GameObject();
-            g0.SetPosition(-500, 250);
+            g0.SetPosition(75, 50);
             g0.SetScale(100, 50);
             g0.SetTexture("OpenGLTutorial.Textures.color_blue.bmp");
             
             GameObject g1 = new GameObject();
-            g1.SetPosition(-350, 150);
+            g1.SetPosition(200, 150);
             g1.SetScale(250, 50);
             g1.SetTexture("OpenGLTutorial.Textures.color_green.bmp");
 
             GameObject g2 = new GameObject();
-            g2.SetPosition(-100, 50);
+            g2.SetPosition(500, 250);
             g2.SetScale(50, 50);
             g2.SetTexture("OpenGLTutorial.Textures.color_orange.bmp");
 
             GameObject g3 = new GameObject();
-            g3.SetPosition(100, 50);
+            g3.SetPosition(700, 350);
             g3.SetScale(200, 50);
             g3.SetTexture("OpenGLTutorial.Textures.color_red.bmp");
 
             GameObject g4 = new GameObject();
-            g4.SetPosition(150, -50);
+            g4.SetPosition(750, 450);
             g4.SetScale(50, 50);
             g4.SetTexture("OpenGLTutorial.Textures.color_yellow.bmp");
 
             GameObject g5 = new GameObject();
-            g5.SetPosition(300, -150);
+            g5.SetPosition(900, 550);
             g5.SetScale(300, 50);
             g5.SetTexture("OpenGLTutorial.Textures.color_pink.bmp");
 
@@ -137,7 +141,8 @@ namespace OpenGLTutorial
 
             // Anpassung der 3D-Instanzen an die neue Fenstergröße:
              GL.Viewport(0, 0, Size.X, Size.Y);
-            _projectionMatrix = Matrix4.CreateOrthographic(Size.X, Size.Y, 0.1f, 1000f);
+            //_projectionMatrix = Matrix4.CreateOrthographic(Size.X, Size.Y, 0.1f, 1000f);
+            _projectionMatrix = Matrix4.CreateOrthographicOffCenter(0, Size.X, 0, Size.Y, 0.1f, 1000f);
         }
 
         /// <summary>
@@ -171,6 +176,12 @@ namespace OpenGLTutorial
             ShaderHUD.Draw(aktuelleObjektliste);
 
             SwapBuffers();
+
+            if (_frameCounter % 1000 == 0)
+            {
+                Title = _windowTitle + " (" + Math.Round(1 / args.Time) + " fps)";
+            }
+            _frameCounter++;
         }
 
         /// <summary>
