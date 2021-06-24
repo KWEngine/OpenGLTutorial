@@ -21,7 +21,7 @@ namespace OpenGLTutorial.OpenGLCore
     {
         private GameWorld _currentWorld = new GameWorld();      // Erstellt eine Welt, die vom Fenster gezeigt wird
         public static ApplicationWindow CurrentWindow;          // Globales Feld, das von allen Objekten genutzt werden kann, um das Fenster anzusprechen
-        public static int TextureDefault;                       // ID einer Textureinheit, die verwendet wird, wenn eine andere Textur nicht gefunden werden kann
+        public static int TextureDefault { get; private set; }  // ID einer Textureinheit, die verwendet wird, wenn eine andere Textur nicht gefunden werden kann
 
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Diese Matrix speichert das Bildschirmseitenverhältnis (z.B. 16:9)
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera (Position, Neigung, etc.)
@@ -29,6 +29,8 @@ namespace OpenGLTutorial.OpenGLCore
         private string _windowTitle = "";
         private double _sumOfFrameTime = 0;
         private uint _sumOfFrames = 0;
+
+        public bool ShowNumbers { get; set; } = true;           // wenn true, wird die Nummerierung gezeichnet
 
         /// <summary>
         /// Konstruktormethode des OpenGL-Fensters
@@ -174,8 +176,11 @@ namespace OpenGLTutorial.OpenGLCore
             // Shader-Programm wählen:
             ShaderStandard.Draw(lightpositions, _viewMatrix * _projectionMatrix, aktuelleObjektliste);
 
-            // Shader-Programm für Nummerierung wählen:
-            ShaderHUD.Draw(aktuelleObjektliste);
+            if (ShowNumbers == true)
+            {
+                // Shader-Programm für Nummerierung wählen:
+                ShaderHUD.Draw(aktuelleObjektliste);
+            }
 
             // Nach dem Zeichnen wird mit SwapBuffers() das gerade gezeichnete Bild an den Monitor geschickt.
             // Der Puffer, der vorher an den Monitor geschickt wurde, ist jetzt der Puffer, in der für den
