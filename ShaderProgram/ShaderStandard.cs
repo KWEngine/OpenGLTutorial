@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using OpenTK.Graphics.OpenGL4;
 using System.IO;
 using OpenTK.Mathematics;
 using OpenGLTutorial.GameCore;
-using OpenGLTutorial.Primitives;
+using OpenGLTutorial.OpenGLCore;
+using OpenGLTutorial.OpenGLCore.Primitives;
 
 namespace OpenGLTutorial.ShaderProgram
 {

@@ -1,12 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using OpenTK.Graphics.OpenGL4;
-using System.IO;
 using OpenTK.Mathematics;
+using OpenGLTutorial.OpenGLCore;
 using OpenGLTutorial.GameCore;
-using OpenGLTutorial.Primitives;
+using OpenGLTutorial.OpenGLCore.Primitives;
 using OpenGLTutorial.Textures;
 
 namespace OpenGLTutorial.ShaderProgram
@@ -30,7 +30,7 @@ namespace OpenGLTutorial.ShaderProgram
         public static void Init()
         {
             //_viewProjectionMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0) * Matrix4.CreateOrthographic(ApplicationWindow.CurrentWindow.Size.X, ApplicationWindow.CurrentWindow.Size.Y, 0.1f, 10f);
-            _viewProjectionMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0) * Matrix4.CreateOrthographicOffCenter(0, ApplicationWindow.CurrentWindow.Size.X, 0, ApplicationWindow.CurrentWindow.Size.Y, 0.1f, 1000f);
+            _viewProjectionMatrix = Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0) * Matrix4.CreateOrthographicOffCenter(0, ApplicationWindow.CurrentWindow.Size.X, ApplicationWindow.CurrentWindow.Size.Y, 0, 0.1f, 1000f);
 
             _shaderId = GL.CreateProgram();
 

@@ -4,7 +4,7 @@ using System.Text;
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
-namespace OpenGLTutorial.Primitives
+namespace OpenGLTutorial.OpenGLCore.Primitives
 {
     public static class PrimitiveQuad
     {
@@ -24,13 +24,13 @@ namespace OpenGLTutorial.Primitives
 
         private static float[] _uvs = new float[]
         {
-           0, 1,
-           1, 1,
            0, 0,
-
-           1, 1,
            1, 0,
-           0, 0
+           0, 1,
+
+           1, 0,
+           1, 1,
+           0, 1
         };
 
         private static float[] _normals = new float[]

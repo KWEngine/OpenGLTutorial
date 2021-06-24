@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenGLTutorial.OpenGLCore;
 using OpenTK.Windowing.Desktop;
 
 namespace OpenGLTutorial
@@ -35,7 +36,7 @@ namespace OpenGLTutorial
             nws.IsFullscreen = false;                                           // Vollbild?
             nws.NumberOfSamples = 0; // FSAA                                    // FSAA-Stufe (0 oder 1 heißt: deaktiviert)
             nws.Title = "EF_SI_AE Broadphase Collision Detection";              // Fenstertitel
-            nws.WindowBorder = OpenTK.Windowing.Common.WindowBorder.Resizable;  // Ist das Fenster in seiner Größe stetig anpassbar?
+            nws.WindowBorder = OpenTK.Windowing.Common.WindowBorder.Resizable;  // Ist das Fenster in seiner Größe anpassbar?
 
             // Dem ApplicationWindow werden dann diese Settings mitgegeben.
             // Nach diesen Vorgaben wird es erstellt.

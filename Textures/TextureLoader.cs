@@ -45,6 +45,12 @@ namespace OpenGLTutorial.Textures
                 throw new Exception("Texture is already defined.");
             }
 
+            string filetype = file.ToLower().Substring(file.LastIndexOf('.') + 1);
+            if(filetype != "png" && filetype != "jpg" && filetype != "jpeg" && filetype != "bmp")
+            {
+                throw new Exception("Texture file type must be either jpg, png oder bmp!");
+            }
+
             Assembly a = Assembly.GetExecutingAssembly();
             Stream s = a.GetManifestResourceStream(file);
 

@@ -1,5 +1,5 @@
 ﻿using OpenGLTutorial.GameCore;
-using OpenGLTutorial.Primitives;
+using OpenGLTutorial.OpenGLCore.Primitives;
 using OpenGLTutorial.Schueler;
 using OpenGLTutorial.ShaderProgram;
 using OpenGLTutorial.Textures;
@@ -9,7 +9,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using System;
 
-namespace OpenGLTutorial
+namespace OpenGLTutorial.OpenGLCore
 {
     /// <summary>
     /// Das ApplicationWindow ist das Herzstück der Anwendung. Hier werden alle nötigen Einstellungen
@@ -23,11 +23,12 @@ namespace OpenGLTutorial
         public static ApplicationWindow CurrentWindow;          // Globales Feld, das von allen Objekten genutzt werden kann, um das Fenster anzusprechen
         public static int TextureDefault;                       // ID einer Textureinheit, die verwendet wird, wenn eine andere Textur nicht gefunden werden kann
 
-        private Matrix4 _projectionMatrix = Matrix4.Identity;   // Gleicht das Bildschirmverhältnis (z.B. 16:9) aus
+        private Matrix4 _projectionMatrix = Matrix4.Identity;   // Diese Matrix speichert das Bildschirmseitenverhältnis (z.B. 16:9)
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera (Position, Neigung, etc.)
 
         private string _windowTitle = "";
-        private uint _frameCounter = 0;
+        private double _sumOfFrameTime = 0;
+        private uint _sumOfFrames = 0;
 
         /// <summary>
         /// Konstruktormethode des OpenGL-Fensters
@@ -50,7 +51,7 @@ namespace OpenGLTutorial
         /// </summary>
         protected override void OnLoad()
         {
-            base.OnLoad();                                          // Aufruf der OnLoad()-Methode der Oberklasse                                             // (i.d.R. sollte diese Methode leer sein)
+            base.OnLoad();                                          // Aufruf der OnLoad()-Methode der Oberklasse (i.d.R. sollte diese Methode leer sein)
 
             GL.ClearColor(0, 0, 0, 1);                              // Farbe des leeren Bildschirms wählen
 
@@ -58,7 +59,7 @@ namespace OpenGLTutorial
 
             GL.Enable(EnableCap.CullFace);                          // Zeichnen von bestimmten Seiten eines Objekts verhindern:
             GL.CullFace(CullFaceMode.Back);                         // Der Kamera abgewandte Seiten werden ignoriert
-            GL.FrontFace(FrontFaceDirection.Ccw);                   // Ob eine Seite eine Vor- oder Rückseite ist, entscheidet die Aufzählung ihrer Eckpunkte
+            GL.FrontFace(FrontFaceDirection.Cw);                    // Ob eine Seite eine Vor- oder Rückseite ist, entscheidet die Aufzählung ihrer Eckpunkte (im Uhrzeigersinn oder nicht)
             GL.BlendFunc(                                           // Wenn ein Objekt transparent ist, wird hier festgelegt, wie genau es mit anderen
                 BlendingFactor.SrcAlpha,                            // Objekten verrechnet werden soll
                 BlendingFactor.OneMinusSrcAlpha
@@ -66,7 +67,6 @@ namespace OpenGLTutorial
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);   // Aktiviert den Hauptbildschirm (ID 0) als Renderziel
 
-            PrimitiveTriangle.Init();                               // Initialisiert die Geometrie für Dreiecke
             PrimitiveQuad.Init();                                   // Initialisiert die Geometrie für Quadrate
             ShaderStandard.Init();                                  // Initialisiert das Hauptrenderprogramm (Shader)
             ShaderHUD.Init();                                       // Initialisiert das HUD-Renderprogramm  (Shader)
@@ -121,6 +121,8 @@ namespace OpenGLTutorial
             g5.SetScale(300, 50);
             g5.SetTexture("OpenGLTutorial.Textures.color_pink.bmp");
 
+            // Die Reihenfolge im Array ist absichtlich 'durcheinander',
+            // damit die Sortieraufgabe überhaupt sinnvoll ist:
             gameObjectList[0] = g4;
             gameObjectList[1] = g1;
             gameObjectList[2] = g5;
@@ -139,10 +141,10 @@ namespace OpenGLTutorial
         {
             base.OnResize(e);
 
-            // Anpassung der 3D-Instanzen an die neue Fenstergröße:
+            // Anpassung der OpenGL-Einstellungen an die neue Fenstergröße:
              GL.Viewport(0, 0, Size.X, Size.Y);
             //_projectionMatrix = Matrix4.CreateOrthographic(Size.X, Size.Y, 0.1f, 1000f);
-            _projectionMatrix = Matrix4.CreateOrthographicOffCenter(0, Size.X, 0, Size.Y, 0.1f, 1000f);
+            _projectionMatrix = Matrix4.CreateOrthographicOffCenter(0, Size.X, Size.Y, 0, 0.1f, 1000f);
         }
 
         /// <summary>
@@ -175,13 +177,27 @@ namespace OpenGLTutorial
             // Shader-Programm für Nummerierung wählen:
             ShaderHUD.Draw(aktuelleObjektliste);
 
+            // Nach dem Zeichnen wird mit SwapBuffers() das gerade gezeichnete Bild an den Monitor geschickt.
+            // Der Puffer, der vorher an den Monitor geschickt wurde, ist jetzt der Puffer, in der für den
+            // nächsten Durchgang gezeichnet wird:
             SwapBuffers();
 
-            if (_frameCounter % 1000 == 0)
+            // Die FPS-Anzeige wird nur einmal pro Sekunde aktualisiert, weil zu häufiges
+            // Aktualisieren des Fenstertitels das System ausbremst und somit die
+            // gemessenen FPS verfälschen kann:
+            _sumOfFrameTime += args.Time;               // In args.Time ist die seit dem letzten Frame verstrichene Zeit (in Sekunden) enthalten
+            _sumOfFrames++;                             // Jeder Frame wird (genau wie die frame time eine Zeile weiter oben) aufsummiert.
+            if (_sumOfFrameTime > 1)                    // Wenn insgesamt mehr als eine Sekunde vergangen ist, dann...
             {
-                Title = _windowTitle + " (" + Math.Round(1 / args.Time) + " fps)";
+                // ...teile die Summe der vergangenen Sekunden durch die Summe der bis dahin gezeichneten Frames.
+                // Das Ergebnis dieser Division ist dann die durchschnittliche frame time (z.B. 0.016 für 16ms).
+                // Indem man z.B. 1 / 0.016 teilt, bekommt man die "frames per second":
+                Title = _windowTitle + " (" + Math.Round(1 / (_sumOfFrameTime / _sumOfFrames)) + " fps)";
+
+                // Reset der Summen für die nächste Hochrechnung:
+                _sumOfFrameTime = 0;
+                _sumOfFrames = 0;
             }
-            _frameCounter++;
         }
 
         /// <summary>
