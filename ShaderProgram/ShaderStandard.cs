@@ -10,32 +10,44 @@ using OpenGLTutorial.OpenGLCore.Primitives;
 
 namespace OpenGLTutorial.ShaderProgram
 {
+    /// <summary>
+    /// ShaderStandard repräsentiert die CPU-Seite des GPU-Shaders.
+    /// Die Klasse kümmert sich um die Kommunikation zwischen C# (CPU) und Grafikkarte.
+    /// </summary>
     public static class ShaderStandard
     {
-        private static int _shaderId = -1;
+        // Jedes dieser int-Felder speichert eine OpenGL-ID.
+        // OpenGL arbeitet intern mit diesen IDs und weiß genau, 
+        // in welchen Speicherbereich der Grafikkarte die dazugehörigen
+        // Informationen liegen.
+        // Jeden Frame werden die zum Rendern benötigten Infos mit Hilfe
+        // dieser IDs an die GPU geschickt.
+        private static int _shaderId = -1;                      // ID des Shader-Programms (es kann mehrere Programme geben, die unterschiedlich rendern)                     
 
-        private static int _vertexShaderId = -1;
-        private static int _fragmentShaderId = -1;
+        private static int _vertexShaderId = -1;                // Der Vertex-Shader ist der Teil des Renderprogramms, der die Objekte auf dem Bildschirm positioniert
+        private static int _fragmentShaderId = -1;              // Der Fragment-Shader füllt die Objekte nach der Positionierung mit Farbe, Licht, Texturen
 
-        private static int _uniformMatrix = -1;
-        private static int _uniformModelMatrix = -1;
-        private static int _uniformNormalMatrix = -1;
+        private static int _uniformMatrix = -1;                 // Hinter dieser ID steckt die Matrix (Model-View-Projection-Matrix), die jeden Ecktpunkt eines Objekt neu positioniert
+        private static int _uniformModelMatrix = -1;            // Die Model-Matrix ist der 'Model'-Teil der Model-View-Projection-Matrix. Sie enthält nur die puren Positionsangaben - keine Angaben zu Kamera oder Bildschirmseitenverhältnis
+        private static int _uniformNormalMatrix = -1;           // Die Normal-Matrix ist eine abgewandelte Form der Model-Matrix. Sie ist für die Beleuchtung wichtig.
 
-        private static int _uniformTexture = -1;
-        private static int _uniformTextureNormalMap = -1;
-        private static int _uniformTextureNormalMapUse = -1;
+        private static int _uniformTexture = -1;                // Link zur Textureinheit auf der GPU
+        private static int _uniformTextureNormalMap = -1;       // Link zur Textureinheit der Normal-Map (Belichtungstextur) auf der GPU
+        private static int _uniformTextureNormalMapUse = -1;    // Link zu einem Schalter, der angibt, ob eine Normal-Map existiert oder nicht
 
-        private static int _uniformLightCount = -1;
-        private static int _uniformLightPositions = -1;
-        private static int _uniformAmbientLight = -1;
+        private static int _uniformLightCount = -1;             // Link zur Anzahl der zu berechnenden Lichter
+        private static int _uniformLightPositions = -1;         // Link zum Array mit den Lichterpositionen
+        private static int _uniformAmbientLight = -1;           // Link zur Angabe des Umgebungslichts (R, G, B jeweils zwischen 0 und 1)
 
         /// <summary>
         /// Initialisiert das Hauptrenderprogramm (Shader)
         /// </summary>
         public static void Init()
         {
-            _shaderId = GL.CreateProgram();
+            // Erstelle ein Shader-Programm (bzw. eine ID dazu):
+            _shaderId = GL.CreateProgram(); 
 
+            // Ermittle, wo im Arbeitsspeicher gerade unser C#-Programm liegt:
             Assembly a = Assembly.GetExecutingAssembly();
 
             // Vertex Shader auslesen:
@@ -52,20 +64,31 @@ namespace OpenGLTutorial.ShaderProgram
             sReaderFragment.Dispose();
             sFragment.Close();
 
+            // Erstelle den Vertex-Shader-Teil des Renderprogramms:
             _vertexShaderId = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(_vertexShaderId, sVertexCode);
 
+            // Erstelle den Fragment-Shader-Teil des Renderprogramms:
             _fragmentShaderId = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(_fragmentShaderId, sFragmentCode);
 
+            // Kompiliere den Vertex-Shader auf der GPU:
             GL.CompileShader(_vertexShaderId);
             GL.AttachShader(_shaderId, _vertexShaderId);
 
+            // Kompiliere den Fragment-Shader auf der GPU:
             GL.CompileShader(_fragmentShaderId);
             GL.AttachShader(_shaderId, _fragmentShaderId);
 
+            // Vereine beide Shader-Teile in einem gemeinsamem Renderprogramm (Shader):
             GL.LinkProgram(_shaderId);
 
+            // Zum Schluss wird in den folgenden 9 Befehlen die Verbindung zwischen CPU und GPU
+            // gesetzt. GL.GetUniformLocation() ermittelt für ein Programm (erster Parameter),
+            // wo auf der GPU die dazugehörige Variable zu finden ist.
+            // In der ersten Zeile wird z.B. nachgeschaut, wo in der GPU nun die Stelle für
+            // die Shader-Variable 'uMatrix' liegt. Die Stelle wird in _uniformMatrix gespeichert, 
+            // so dass zu späterem Zeitpunkt die Infos an genau diese Stelle hochgeladen werden können:
             _uniformMatrix = GL.GetUniformLocation(_shaderId, "uMatrix");
             _uniformModelMatrix = GL.GetUniformLocation(_shaderId, "uModelMatrix");
             _uniformNormalMatrix = GL.GetUniformLocation(_shaderId, "uNormalMatrix");
