@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK.Windowing.GraphicsLibraryFramework;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,6 +13,9 @@ namespace OpenGLTutorial.GameCore
     /// </summary>
     public class GameWorld
     {
+        private List<GameObject> _gameObjectsToBeAdded = new List<GameObject>();    // Liste der für den nächsten Frame hinzuzufügenden Objekte
+        private List<GameObject> _gameObjectsToBeRemoved = new List<GameObject>();  // Liste der für den nächsten Frame zu löschenden Objekte
+
         private List<GameObject> _gameObjects = new List<GameObject>();     // Liste aller GameObject-Instanzen
         private List<LightObject> _lightObjects = new List<LightObject>();  // Liste aller Lichtinstanzen
 
@@ -21,17 +25,22 @@ namespace OpenGLTutorial.GameCore
         /// <param name="g">hinzuzufügendes GameObject</param>
         public void AddGameObject(GameObject g)
         {
-            _gameObjects.Add(g);
+            if (!_gameObjectsToBeAdded.Contains(g))
+            {
+                _gameObjectsToBeAdded.Add(g);
+            }
         }
 
         /// <summary>
         /// Entfernt ein GameObject aus der Welt
         /// </summary>
         /// <param name="g">zu entfernendes GameObject</param>
-        /// <returns>true, wenn das Entfernen geklappt hat</returns>
-        public bool RemoveGameObject(GameObject g)
+        public void RemoveGameObject(GameObject g)
         {
-            return _gameObjects.Remove(g);
+            if (!_gameObjectsToBeRemoved.Contains(g))
+            {
+                _gameObjectsToBeRemoved.Add(g);
+            }
         }
 
         /// <summary>
@@ -87,6 +96,29 @@ namespace OpenGLTutorial.GameCore
         public int GetLightCount()
         {
             return _lightObjects.Count;
+        }
+
+        /// <summary>
+        /// Adds and removes objects from the current world before the next frame cycle begins.
+        /// </summary>
+        public void AddRemoveObjects()
+        {
+            foreach (GameObject objectToBeRemoved in _gameObjectsToBeRemoved)
+            {
+                _gameObjects.Remove(objectToBeRemoved);
+            }
+            _gameObjectsToBeRemoved.Clear();
+
+            foreach (GameObject objectToBeAdded in _gameObjectsToBeAdded)
+            {
+                if (!_gameObjects.Contains(objectToBeAdded))
+                {
+                    _gameObjects.Add(objectToBeAdded);
+                }
+            }
+            _gameObjectsToBeAdded.Clear();
+
+            
         }
     }
 }

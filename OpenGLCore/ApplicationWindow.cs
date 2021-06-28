@@ -30,6 +30,8 @@ namespace OpenGLTutorial.OpenGLCore
         private double _sumOfFrameTime = 0;
         private uint _sumOfFrames = 0;
 
+        public float DeltaTimeFactor { get; private set; } = 1.0f;
+
         public bool ShowNumbers { get; set; } = true;           // wenn true, wird die Nummerierung gezeichnet
 
         /// <summary>
@@ -187,22 +189,7 @@ namespace OpenGLTutorial.OpenGLCore
             // nächsten Durchgang gezeichnet wird:
             SwapBuffers();
 
-            // Die FPS-Anzeige wird nur einmal pro Sekunde aktualisiert, weil zu häufiges
-            // Aktualisieren des Fenstertitels das System ausbremst und somit die
-            // gemessenen FPS verfälschen kann:
-            _sumOfFrameTime += args.Time;               // In args.Time ist die seit dem letzten Frame verstrichene Zeit (in Sekunden) enthalten
-            _sumOfFrames++;                             // Jeder Frame wird (genau wie die frame time eine Zeile weiter oben) aufsummiert.
-            if (_sumOfFrameTime > 1)                    // Wenn insgesamt mehr als eine Sekunde vergangen ist, dann...
-            {
-                // ...teile die Summe der vergangenen Sekunden durch die Summe der bis dahin gezeichneten Frames.
-                // Das Ergebnis dieser Division ist dann die durchschnittliche frame time (z.B. 0.016 für 16ms).
-                // Indem man z.B. 1 / 0.016 teilt, bekommt man die "frames per second":
-                Title = _windowTitle + " (" + Math.Round(1 / (_sumOfFrameTime / _sumOfFrames)) + " fps)";
-
-                // Reset der Summen für die nächste Hochrechnung:
-                _sumOfFrameTime = 0;
-                _sumOfFrames = 0;
-            }
+            
         }
 
         /// <summary>
@@ -216,6 +203,36 @@ namespace OpenGLTutorial.OpenGLCore
             // Hier ist aktuell noch nichts enthalten. Später würde man hier in einer Schleife alle GameObject-Instanzen
             // fragen, ob sie sich bewegen 'möchten' und sie entsprechend der Benutzereingaben oder ihrer AI versetzen/rotieren/skalieren:
             base.OnUpdateFrame(args);
+
+            if (_currentWorld == null)
+                return;
+
+            _currentWorld.AddRemoveObjects();
+
+            foreach(GameObject g in _currentWorld.GetGameObjects())
+            {
+                g.Update(KeyboardState, MouseState);
+            }
+
+            // Die FPS-Anzeige wird nur einmal pro Sekunde aktualisiert, weil zu häufiges
+            // Aktualisieren des Fenstertitels das System ausbremst und somit die
+            // gemessenen FPS verfälschen kann:
+            _sumOfFrameTime += args.Time;                           // In args.Time ist die seit dem letzten Frame verstrichene Zeit (in Sekunden) enthalten
+            DeltaTimeFactor = (float)(args.Time / (1.0 / 60.0));    // Berechne anhand der verstrichenen frame time den DeltaTime-Faktor
+
+
+            _sumOfFrames++;                                         // Jeder Frame wird (genau wie die frame time eine Zeile weiter oben) aufsummiert.
+            if (_sumOfFrameTime > 1)                                // Wenn insgesamt mehr als eine Sekunde vergangen ist, dann...
+            {
+                // ...teile die Summe der vergangenen Sekunden durch die Summe der bis dahin gezeichneten Frames.
+                // Das Ergebnis dieser Division ist dann die durchschnittliche frame time (z.B. 0.016 für 16ms).
+                // Indem man z.B. 1 / 0.016 teilt, bekommt man die "frames per second":
+                Title = _windowTitle + " (" + Math.Round(1 / (_sumOfFrameTime / _sumOfFrames)) + " fps)";
+
+                // Reset der Summen für die nächste Hochrechnung:
+                _sumOfFrameTime = 0;
+                _sumOfFrames = 0;
+            }
         }
     }
 }
