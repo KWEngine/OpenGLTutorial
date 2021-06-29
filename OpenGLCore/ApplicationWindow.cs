@@ -166,6 +166,9 @@ namespace OpenGLTutorial.OpenGLCore
             // Berechne die aktuellen Positionen aller Lichtobjekte und speichere sie in einem Array:
             float[] lightpositions = _currentWorld.GetLightPositions();
 
+            // Kombiniere die Kamera-Matrix mit der Bildschirmseitenverhältnis-Matrix:
+            Matrix4 viewProjectionMatrix = _viewMatrix * _projectionMatrix;
+
             // Hole die aktuellen Objekte, die gezeichnet werden sollen:
             GameObject[] aktuelleObjektliste = _currentWorld.GetGameObjects().ToArray();
 
@@ -175,10 +178,12 @@ namespace OpenGLTutorial.OpenGLCore
             // Durchlaufe alle Objekte und markiere diejenigen, die potenziell Teil einer Kollision sind:
             Schuelermethoden.MarkierePotenzielleKollisionskandidaten(aktuelleObjektliste);
 
-            // Shader-Programm wählen:
-            ShaderStandard.Draw(lightpositions, _viewMatrix * _projectionMatrix, aktuelleObjektliste);
+            // Haupt-Shader-Programm alle Objekte zeichnen lassen:
+            ShaderStandard.Draw(lightpositions, viewProjectionMatrix, aktuelleObjektliste);
 
-            if (ShowNumbers == true)
+            ShaderStandard.DrawOutline(viewProjectionMatrix, aktuelleObjektliste);
+
+            if (ShowNumbers == true) 
             {
                 // Shader-Programm für Nummerierung wählen:
                 ShaderHUD.Draw(aktuelleObjektliste);

@@ -7,6 +7,7 @@ using OpenTK.Mathematics;
 using OpenGLTutorial.GameCore;
 using OpenGLTutorial.OpenGLCore;
 using OpenGLTutorial.OpenGLCore.Primitives;
+using OpenGLTutorial.Textures;
 
 namespace OpenGLTutorial.ShaderProgram
 {
@@ -38,6 +39,9 @@ namespace OpenGLTutorial.ShaderProgram
         private static int _uniformLightCount = -1;             // Link zur Anzahl der zu berechnenden Lichter
         private static int _uniformLightPositions = -1;         // Link zum Array mit den Lichterpositionen
         private static int _uniformAmbientLight = -1;           // Link zur Angabe des Umgebungslichts (R, G, B jeweils zwischen 0 und 1)
+
+        private static float[] _dummyPositions = new float[0];  // Dummy-Array mit 0 Lichtpositionen
+        private static int _textureIdColorOutline = TextureLoader.LoadTexture("OpenGLTutorial.Textures.color_red_outline.bmp");
 
         /// <summary>
         /// Initialisiert das Hauptrenderprogramm (Shader)
@@ -162,6 +166,58 @@ namespace OpenGLTutorial.ShaderProgram
                     GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
 
                     // Teile der GPU mit, dass die Geometrie- und Texturdaten nicht mehr benötigt werden:
+                    GL.BindVertexArray(0);
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
+                }
+            }
+
+            // Deaktiviere das aktuell gewählte Renderprogramm (0 ist fast immer eine ungültige ID in OpenGL):
+            GL.UseProgram(0);
+        }
+
+        /// <summary>
+        /// Zeichnet die Objekte um 8 Pixel vergrößert in rot.
+        /// </summary>
+        /// <param name="viewProjectionMatrix">Matrix, die Kameraposition und FOV enthält</param>
+        /// <param name="objectList">Array mit den zu zeichnenden Objekten</param>
+        public static void DrawOutline(Matrix4 viewProjectionMatrix, GameObject[] objectList)
+        {
+            GL.UseProgram(GetProgramId());
+
+            GL.Uniform3(GetLightPositionsId(), 0, _dummyPositions);
+            GL.Uniform1(GetLightCountId(), 0);
+            GL.Uniform3(GetAmbientLightId(), 1f, 1f, 1f);
+
+            // Durchlaufe jedes zu zeichnende Objekt:
+            foreach (GameObject g in objectList)
+            {
+                if (g != null && g.IsCollisionCandidate() == true)
+                {
+                    Matrix4 modelMatrix =
+                        Matrix4.CreateScale(new Vector3(g.GetScale().X + 8, g.GetScale().Y + 8, 1))
+                        * Matrix4.CreateFromQuaternion(g.GetRotation())
+                        * Matrix4.CreateTranslation(g.GetPosition().X, g.GetPosition().Y, 0);
+
+                    Matrix4 normalMatrix = Matrix4.Identity;
+                    Matrix4 mvp = modelMatrix * viewProjectionMatrix;
+
+                    GL.UniformMatrix4(GetMatrixId(), false, ref mvp);
+                    GL.UniformMatrix4(GetModelMatrixId(), false, ref modelMatrix);
+                    GL.UniformMatrix4(GetNormalMatrixId(), false, ref normalMatrix);
+
+                    GL.ActiveTexture(TextureUnit.Texture0);
+                    GL.BindTexture(TextureTarget.Texture2D, _textureIdColorOutline);
+                    GL.Uniform1(GetTextureId(), 0);
+
+                    GL.ActiveTexture(TextureUnit.Texture1);
+                    int normalMapId = g.GetTextureNormalMap();
+                    GL.BindTexture(TextureTarget.Texture2D, normalMapId > 0 ? normalMapId : ApplicationWindow.TextureDefault);
+                    GL.Uniform1(GetTextureNormalMapId(), 1);
+                    GL.Uniform1(GetTextureNormalMapUseId(), 0);
+
+                    GL.BindVertexArray(PrimitiveQuad.GetVAOId());
+                    GL.DrawArrays(PrimitiveType.Triangles, 0, PrimitiveQuad.GetPointCount());
+
                     GL.BindVertexArray(0);
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                 }
