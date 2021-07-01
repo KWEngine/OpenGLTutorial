@@ -93,7 +93,7 @@ namespace OpenGLTutorial.OpenGLCore
         /// <returns>Array mit den erstellten GameObject-Instanzen</returns>
         private GameObject[] PrepareGameObjectsForTask()
         {
-            GameObject[] gameObjectList = new GameObject[6];
+            GameObject[] gameObjectList = new GameObject[7];
 
             GameObject g0 = new GameObject();
             g0.SetPosition(75, 50);
@@ -125,6 +125,11 @@ namespace OpenGLTutorial.OpenGLCore
             g5.SetScale(300, 50);
             g5.SetTexture("OpenGLTutorial.Textures.color_pink.bmp");
 
+            GameObject g6 = new GameObject();
+            g6.SetPosition(1200, 650);
+            g6.SetScale(100, 50);
+            g6.SetTexture("OpenGLTutorial.Textures.color_beige.bmp");
+
             // Die Reihenfolge im Array ist absichtlich 'durcheinander',
             // damit die Sortieraufgabe überhaupt sinnvoll ist:
             gameObjectList[0] = g4;
@@ -132,7 +137,8 @@ namespace OpenGLTutorial.OpenGLCore
             gameObjectList[2] = g5;
             gameObjectList[3] = g0;
             gameObjectList[4] = g3;
-            gameObjectList[5] = g2;
+            gameObjectList[5] = g6;
+            gameObjectList[6] = g2;
 
             return gameObjectList;
         }
@@ -209,16 +215,23 @@ namespace OpenGLTutorial.OpenGLCore
             // fragen, ob sie sich bewegen 'möchten' und sie entsprechend der Benutzereingaben oder ihrer AI versetzen/rotieren/skalieren:
             base.OnUpdateFrame(args);
 
+            // Brich die Methode frühzeitig ab, wenn keine aktuelle Spielwelt gesetzt ist:
             if (_currentWorld == null)
                 return;
 
+            // Füge der aktuellen Welt die im letzten Frame erzeugten Objekte hinzu oder entferne die Objekte,
+            // die im letzten Frame als "zu entfernen" markiert wurden: 
             _currentWorld.AddRemoveObjects();
 
+            // Durchlaufe die Liste der aktuellen Spielobjekte und rufe für jedes Objekt die Update-Methode auf, 
+            // so dass jedes Objekt gemäß seiner Programmierung Bewegungen für den jetzt anstehenden Frame 
+            // ausführen kann:
             foreach(GameObject g in _currentWorld.GetGameObjects())
             {
                 g.Update(KeyboardState, MouseState);
             }
 
+            // Der kommende Code dient hauptsächlich der FPS-Anzeige im Fenstertitel.
             // Die FPS-Anzeige wird nur einmal pro Sekunde aktualisiert, weil zu häufiges
             // Aktualisieren des Fenstertitels das System ausbremst und somit die
             // gemessenen FPS verfälschen kann:

@@ -19,6 +19,7 @@
     <None Remove="ShaderProgram\shaderHUD_vertex.glsl" />
     <None Remove="ShaderProgram\shaderStandard_fragment.glsl" />
     <None Remove="ShaderProgram\shaderStandard_vertex.glsl" />
+    <None Remove="Textures\color_beige.bmp" />
     <None Remove="Textures\color_blue.bmp" />
     <None Remove="Textures\color_green.bmp" />
     <None Remove="Textures\color_orange.bmp" />
@@ -35,6 +36,9 @@
     <EmbeddedResource Include="ShaderProgram\shaderStandard_fragment.glsl" />
     <EmbeddedResource Include="ShaderProgram\shaderHUD_vertex.glsl" />
     <EmbeddedResource Include="ShaderProgram\shaderStandard_vertex.glsl" />
+    <EmbeddedResource Include="Textures\color_beige.bmp">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Textures\color_orange.bmp">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
