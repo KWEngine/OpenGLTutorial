@@ -26,6 +26,8 @@ namespace OpenGLTutorial.OpenGLCore
         private Matrix4 _projectionMatrix = Matrix4.Identity;   // Diese Matrix speichert das Bildschirmseitenverhältnis (z.B. 16:9)
         private Matrix4 _viewMatrix = Matrix4.Identity;         // Simuliert eine Kamera (Position, Neigung, etc.)
 
+        private GameObject[] _aktuelleObjektliste;              // Enthält die zu sortierenden Objekte pro Frame
+
         private string _windowTitle = "";
         private double _sumOfFrameTime = 0;
         private uint _sumOfFrames = 0;
@@ -175,32 +177,20 @@ namespace OpenGLTutorial.OpenGLCore
             // Kombiniere die Kamera-Matrix mit der Bildschirmseitenverhältnis-Matrix:
             Matrix4 viewProjectionMatrix = _viewMatrix * _projectionMatrix;
 
-            // Hole die aktuellen Objekte, die gezeichnet werden sollen:
-            GameObject[] aktuelleObjektliste = _currentWorld.GetGameObjects().ToArray();
-
-            // Sortiere sie aufsteigend nach der Position ihrer linken Seite:
-            Schuelermethoden.SortiereDieObjekte(aktuelleObjektliste);
-
-            // Durchlaufe alle Objekte und markiere diejenigen, die potenziell Teil einer Kollision sind:
-            Schuelermethoden.MarkierePotenzielleKollisionskandidaten(aktuelleObjektliste);
-
             // Haupt-Shader-Programm alle Objekte zeichnen lassen:
-            ShaderStandard.Draw(lightpositions, viewProjectionMatrix, aktuelleObjektliste);
-
-            ShaderStandard.DrawOutline(viewProjectionMatrix, aktuelleObjektliste);
+            ShaderStandard.Draw(lightpositions, viewProjectionMatrix, _aktuelleObjektliste);
+            ShaderStandard.DrawOutline(viewProjectionMatrix, _aktuelleObjektliste);
 
             if (ShowNumbers == true) 
             {
                 // Shader-Programm für Nummerierung wählen:
-                ShaderHUD.Draw(aktuelleObjektliste);
+                ShaderHUD.Draw(_aktuelleObjektliste);
             }
 
             // Nach dem Zeichnen wird mit SwapBuffers() das gerade gezeichnete Bild an den Monitor geschickt.
             // Der Puffer, der vorher an den Monitor geschickt wurde, ist jetzt der Puffer, in der für den
             // nächsten Durchgang gezeichnet wird:
             SwapBuffers();
-
-            
         }
 
         /// <summary>
@@ -223,10 +213,19 @@ namespace OpenGLTutorial.OpenGLCore
             // die im letzten Frame als "zu entfernen" markiert wurden: 
             _currentWorld.AddRemoveObjects();
 
+            // Hole die aktuellen Objekte, die gezeichnet werden sollen:
+            _aktuelleObjektliste = _currentWorld.GetGameObjects().ToArray();
+
+            // Sortiere sie aufsteigend nach der Position ihrer linken Seite:
+            Schuelermethoden.SortiereDieObjekte(_aktuelleObjektliste);
+
+            // Durchlaufe alle Objekte und markiere diejenigen, die potenziell Teil einer Kollision sind:
+            Schuelermethoden.MarkierePotenzielleKollisionskandidaten(_aktuelleObjektliste);
+
             // Durchlaufe die Liste der aktuellen Spielobjekte und rufe für jedes Objekt die Update-Methode auf, 
             // so dass jedes Objekt gemäß seiner Programmierung Bewegungen für den jetzt anstehenden Frame 
             // ausführen kann:
-            foreach(GameObject g in _currentWorld.GetGameObjects())
+            foreach (GameObject g in _aktuelleObjektliste)
             {
                 g.Update(KeyboardState, MouseState);
             }
